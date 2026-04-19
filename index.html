@@ -3,43 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPG Engine Avançado</title>
+    <title>Crônicas de Aethelgard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="game-container">
+        <div class="game-title">
+            <h1>🗡️ Crônicas de Aethelgard</h1>
+        </div>
+
         <header>
             <div class="character-info">
-                <h2>Herói - Nível <span id="lvl">1</span></h2>
+                <h2>Cavaleiro - Nível <span id="lvl">1</span></h2>
                 <div class="bar-container tooltip" title="Experiência">
                     <div id="xp-bar" class="bar xp"></div>
                 </div>
             </div>
             <div id="stats">
-                <div class="stat">❤️ HP: <span id="hp">100</span>/<span id="max-hp">100</span></div>
-                <div class="stat">🧪 Poções: <span id="potions">3</span></div>
-                <div class="stat">💰 Ouro: <span id="gold">0</span></div>
+                <div class="stat tooltip" title="Vida">❤️ <span id="hp">100</span>/<span id="max-hp">100</span></div>
+                <div class="stat tooltip" title="Poções">🧪 <span id="potions">3</span></div>
+                <div class="stat tooltip" title="Ouro">💰 <span id="gold">0</span></div>
             </div>
         </header>
 
         <main>
-            <div id="log-window">
-                <ul id="game-log">
-                    <li>Bem-vindo ao Reino! Escolha sua ação.</li>
-                </ul>
+            <div id="arena" class="hidden">
+                <div class="portrait-container" id="player-portrait">
+                    <div class="portrait hero-art">🛡️</div>
+                </div>
+                
+                <div class="vs-text">VS</div>
+                
+                <div class="portrait-container" id="enemy-portrait">
+                    <div class="portrait enemy-art" id="enemy-art-icon">👹</div>
+                </div>
             </div>
 
             <div id="enemy-panel" class="hidden">
-                <h3>Inimigo: <span id="enemy-name">---</span></h3>
+                <h3><span id="enemy-name">---</span></h3>
                 <div class="bar-container">
                     <div id="enemy-hp-bar" class="bar enemy-hp"></div>
                 </div>
+            </div>
+
+            <div id="log-window">
+                <ul id="game-log">
+                    <li>Sua jornada em Aethelgard começa agora...</li>
+                </ul>
             </div>
         </main>
 
         <div id="controls">
             <div id="exploration-actions">
-                <button onclick="game.explore()">🌿 Explorar Floresta</button>
+                <button onclick="game.explore()">🌲 Explorar Floresta</button>
                 <button onclick="game.rest()">🛌 Pousada (10 Ouro)</button>
                 <button onclick="player.buyPotion()">🛒 Comprar Poção (20 Ouro)</button>
             </div>
