@@ -16,26 +16,26 @@
             <p style="text-align: center; color: #f5f5dc;">Escolha seu destino:</p>
             
             <div class="class-grid">
-                <div class="class-card parchment" id="btn-cavaleiro">
+                <button class="class-card parchment" onclick="window.game.chooseClass('cavaleiro')">
                     <h2>🛡️ Cavaleiro</h2>
                     <p>Defesa e Vida altas.</p>
                     <small>Skill: Golpe Duplo</small>
-                </div>
-                <div class="class-card parchment" id="btn-mago">
+                </button>
+                <button class="class-card parchment" onclick="window.game.chooseClass('mago')">
                     <h2>🧙‍♂️ Mago</h2>
                     <p>Dano mágico extremo, Defesa baixa.</p>
                     <small>Skill: Bola de Fogo</small>
-                </div>
-                <div class="class-card parchment" id="btn-arqueiro">
+                </button>
+                <button class="class-card parchment" onclick="window.game.chooseClass('arqueiro')">
                     <h2>🏹 Arqueiro</h2>
                     <p>Ataque veloz, Críticos altos.</p>
                     <small>Skill: Tiro Preciso</small>
-                </div>
-                <div class="class-card parchment" id="btn-anao">
+                </button>
+                <button class="class-card parchment" onclick="window.game.chooseClass('anao')">
                     <h2>🪓 Anão Guerreiro</h2>
                     <p>O maior tanque do jogo.</p>
                     <small>Skill: Fúria</small>
-                </div>
+                </button>
             </div>
         </div>
 
@@ -72,7 +72,7 @@
                     </div>
                 </div>
 
-                <div class="inventory-btn" id="btn-inventory">
+                <div class="inventory-btn" onclick="window.ui.openInventory()">
                     <h3>🎒 Bolsa</h3>
                     <p>💰 Ouro: <b id="gold">0</b></p>
                     <p>🧪 Poções: <b id="potions">3</b></p>
@@ -101,15 +101,15 @@
 
             <div id="controls">
                 <div id="exploration-actions">
-                    <button class="btn-medieval" id="btn-explore">🌲 Explorar</button>
-                    <button class="btn-medieval" id="btn-rest">🛌 Pousada (10💰)</button>
-                    <button class="btn-medieval purchase" id="btn-buy-potion">🛒 Comprar Poção (20💰)</button>
+                    <button class="btn-medieval" onclick="window.game.explore()">🌲 Explorar</button>
+                    <button class="btn-medieval" onclick="window.game.rest()">🛌 Pousada (10💰)</button>
+                    <button class="btn-medieval purchase" onclick="window.player.buyPotion()">🛒 Comprar Poção (20💰)</button>
                 </div>
                 <div id="combat-actions" class="hidden">
-                    <button class="btn-medieval attack" id="btn-attack">⚔️ Atacar!</button>
-                    <button class="btn-medieval skill" id="btn-skill">✨ <span id="skill-name">Poder</span></button>
-                    <button class="btn-medieval heal" id="btn-use-potion">🧪 Poção</button>
-                    <button class="btn-medieval flee" id="btn-flee">🏃 Fugir</button>
+                    <button class="btn-medieval attack" onclick="window.combat.attack()">⚔️ Atacar!</button>
+                    <button class="btn-medieval skill" onclick="window.combat.useSkill()">✨ <span id="skill-name">Poder</span></button>
+                    <button class="btn-medieval heal" onclick="window.player.usePotion()">🧪 Poção</button>
+                    <button class="btn-medieval flee" onclick="window.combat.flee()">🏃 Fugir</button>
                 </div>
             </div>
         </div>
@@ -119,7 +119,7 @@
     <div id="inventory-modal" class="modal-overlay hidden">
         <div class="parchment inventory-panel">
             <h2>🎒 Gerenciador de Itens</h2>
-            <button class="close-btn btn-medieval" id="btn-close-inv">❌ Fechar</button>
+            <button class="close-btn btn-medieval" onclick="window.ui.closeInventory()">❌ Fechar</button>
             
             <div class="inventory-sections">
                 <div class="inv-category">
