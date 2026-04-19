@@ -1,14 +1,13 @@
 // ==========================================
-// SISTEMA DE ÁUDIO (Domínio Público Seguro)
+// SISTEMA DE ÁUDIO (Caminhos Locais - OBRIGATÓRIO PARA O GITHUB)
 // ==========================================
 window.audio = {
     muted: false,
-    bgm: new Audio('https://ia800408.us.archive.org/11/items/KevinMacLeod-EpicUnease/Epic%20Unease.mp3'), 
-    clickSfx: new Audio('https://ia803204.us.archive.org/16/items/click_202005/click.mp3'),
-    attackSfx: new Audio('https://ia802804.us.archive.org/24/items/sword-swing/Sword%20Swing.mp3'),
-    gruntSfx: new Audio('https://ia600204.us.archive.org/29/items/PainSoundEffect/Pain%20Sound%20Effect.mp3'),
+    bgm: new Audio('bgm.mp3'), 
+    clickSfx: new Audio('click.mp3'),
+    attackSfx: new Audio('attack.mp3'),
+    gruntSfx: new Audio('grunt.mp3'),
     
-    // Flag para saber se a música já tentou tocar
     bgmStarted: false,
     
     init() {
@@ -19,7 +18,6 @@ window.audio = {
         this.gruntSfx.volume = 0.8;
     },
     
-    // Função para iniciar a música de forma segura após interação
     startBGM() {
         if (!this.muted && !this.bgmStarted) {
             let playPromise = this.bgm.play();
@@ -27,7 +25,7 @@ window.audio = {
                 playPromise.then(() => {
                     this.bgmStarted = true;
                 }).catch(error => {
-                    console.log("Autoplay bloqueado. A música iniciará após o próximo clique.", error);
+                    console.log("Áudio aguardando interação direta do usuário.");
                 });
             }
         }
@@ -61,7 +59,6 @@ window.audio = {
         if(this.muted) {
             this.bgm.pause();
         } else {
-            // Se foi desmutado, força o play independentemente da flag
             this.bgm.play().catch(()=>{});
             this.bgmStarted = true;
         }
@@ -69,7 +66,6 @@ window.audio = {
     }
 };
 
-// Inicializa os volumes, mas NÃO tenta tocar nada ainda
 window.audio.init();
 
 // ==========================================
@@ -150,6 +146,7 @@ window.npcs = [
 ];
 
 window.player = {
+    playerName: "Herói",
     classObj: null, lvl: 1, xp: 0, xpToNext: 50, gold: 0, potions: 3, highestBossDefeated: 0,
     hp: 0, maxHp: 0, mp: 0, maxMp: 0, baseAtk: 0, baseDef: 0, atk: 0, def: 0, 
     inventory: [], equipped: { weapon: null, armor: null, offhand: null },
@@ -206,6 +203,7 @@ window.player = {
 
 window.game = {
     state: 'menu',
+    tempClassKey: null,
 
     saveGame() {
         if (!window.player.classObj) return; 
@@ -217,19 +215,23 @@ window.game = {
             const saved = localStorage.getItem('aethelgard_save');
             if (saved) {
                 Object.assign(window.player, JSON.parse(saved));
+                
+                document.getElementById('hero-name-display').innerText = window.player.playerName || "Herói";
                 document.getElementById('hero-icon').innerText = window.player.classObj.icon;
                 document.getElementById('player-art-icon').innerText = window.player.classObj.icon;
                 document.getElementById('hero-class-name').innerText = window.player.classObj.name;
                 document.getElementById('skill-name').innerText = window.player.classObj.skillName;
 
                 document.getElementById('class-selection-screen').classList.add('hidden');
+                if (document.getElementById('name-selection-screen')) {
+                    document.getElementById('name-selection-screen').classList.add('hidden');
+                }
                 document.getElementById('main-game-screen').classList.remove('hidden');
                 document.getElementById('top-menu').classList.remove('hidden');
                 
                 this.state = 'explore'; window.player.recalculateStats(); 
                 
-                // Tenta iniciar a música se carregar o save
-                window.audio.startBGM();
+                document.body.addEventListener('click', () => { window.audio.startBGM(); }, { once: true });
                 return true;
             }
         } catch(e) { localStorage.removeItem('aethelgard_save'); } 
@@ -245,22 +247,49 @@ window.game = {
 
     chooseClass(key) {
         window.audio.playClick(); 
+        this.tempClassKey = key;
         
-        // Agora sim a música inicia com certeza, porque o usuário clicou em algo
-        window.audio.startBGM();
-        
-        const cls = window.classesData[key]; window.player.classObj = cls;
+        document.getElementById('class-selection-screen').classList.add('hidden');
+        document.getElementById('name-selection-screen').classList.remove('hidden');
+        document.getElementById('input-hero-name').focus();
+    },
+
+    cancelName() {
+        window.audio.playClick();
+        this.tempClassKey = null;
+        document.getElementById('name-selection-screen').classList.add('hidden');
+        document.getElementById('class-selection-screen').classList.remove('hidden');
+    },
+
+    confirmName() {
+        const input = document.getElementById('input-hero-name').value.trim();
+        if (!input) {
+            alert(window.lang === 'pt' ? "Por favor, batize seu herói!" : "Please name your hero!");
+            return;
+        }
+
+        window.audio.playClick(); 
+        window.audio.startBGM(); 
+
+        window.player.playerName = input;
+        const cls = window.classesData[this.tempClassKey]; 
+        window.player.classObj = cls;
         window.player.hp = cls.hp; window.player.maxHp = cls.hp; window.player.mp = cls.mp; window.player.maxMp = cls.mp;
         window.player.baseAtk = cls.atk; window.player.baseDef = cls.def; window.player.recalculateStats();
         
-        document.getElementById('hero-icon').innerText = cls.icon; document.getElementById('player-art-icon').innerText = cls.icon;
-        document.getElementById('hero-class-name').innerText = cls.name; document.getElementById('skill-name').innerText = cls.skillName;
+        document.getElementById('hero-name-display').innerText = window.player.playerName;
+        document.getElementById('hero-icon').innerText = cls.icon; 
+        document.getElementById('player-art-icon').innerText = cls.icon;
+        document.getElementById('hero-class-name').innerText = cls.name; 
+        document.getElementById('skill-name').innerText = cls.skillName;
         
-        document.getElementById('class-selection-screen').classList.add('hidden'); 
+        document.getElementById('name-selection-screen').classList.add('hidden'); 
         document.getElementById('main-game-screen').classList.remove('hidden');
         document.getElementById('top-menu').classList.remove('hidden');
         
-        this.state = 'explore'; window.ui.log(window.lang==='pt'?"A aventura começa!":"The adventure begins!", "loot"); this.saveGame();
+        this.state = 'explore'; 
+        window.ui.log(window.lang==='pt' ? `A lenda de ${window.player.playerName} começa!` : `The legend of ${window.player.playerName} begins!`, "loot"); 
+        this.saveGame();
     },
 
     explore() {
@@ -417,13 +446,6 @@ window.ui = {
     toggleMode(b) { document.getElementById('exploration-actions').classList.toggle('hidden', b); document.getElementById('combat-actions').classList.toggle('hidden', !b); document.getElementById('battle-arena').classList.toggle('hidden', !b); },
     animate(id, cls) { const el = document.getElementById(id); if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 350); }
 };
-
-// O evento de click em qualquer lugar da tela também tenta disparar o áudio para garantir
-document.body.addEventListener('click', () => {
-    if (window.game.state !== 'menu' && !window.audio.bgmStarted) {
-        window.audio.startBGM();
-    }
-}, { once: true }); 
 
 window.onload = () => { 
     window.sys.setLang('pt'); 
