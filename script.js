@@ -1,3 +1,6 @@
+// ==========================================
+// ESTADO GLOBAL DO JOGADOR
+// ==========================================
 const player = {
     hp: 100, maxHp: 100, atk: 15, lvl: 1, xp: 0, xpToNext: 50, gold: 0, potions: 3,
 
@@ -26,6 +29,9 @@ const player = {
     }
 };
 
+// ==========================================
+// BANCO DE MONSTROS E NPCS
+// ==========================================
 const bestiary = [
     { name: "Goblin Rastejante", baseHp: 30, baseAtk: 5, baseXp: 25, baseGold: 10, icon: "👺" },
     { name: "Lobo Faminto", baseHp: 45, baseAtk: 8, baseXp: 40, baseGold: 15, icon: "🐺" },
@@ -40,13 +46,16 @@ const npcs = [
     { name: "Ladrão Ágil", encounter: () => { if(player.gold > 5) { player.gold -= 5; ui.log("🥷 Um vulto passa rápido por você. Suas moedas estão mais leves! (-5💰)", "dmg-taken"); } else { ui.log("🥷 Um vulto o revista, mas desiste por você estar pobre.", "npc"); } ui.update(); } }
 ];
 
+// ==========================================
+// MOTOR DE COMBATE
+// ==========================================
 const combat = {
     enemy: null,
 
     start(enemyData) {
         game.state = 'combat';
         
-        // SISTEMA DE DIFICULDADE: O inimigo ganha 20% de atributos por nível do jogador
+        // Dificuldade acompanha o nível do jogador
         const difficultyScale = 1 + ((player.lvl - 1) * 0.20); 
         
         this.enemy = { 
@@ -110,12 +119,14 @@ const combat = {
     end() { game.state = 'explore'; this.enemy = null; document.getElementById('combat-actions').style.pointerEvents = 'auto'; ui.toggleMode(false); ui.update(); }
 };
 
+// ==========================================
+// EVENTOS DO JOGO
+// ==========================================
 const game = {
     state: 'explore',
 
     explore() {
         const roll = Math.random();
-        // 50% Batalha, 25% Ouro, 25% NPC
         if (roll < 0.50) {
             const randomEnemy = bestiary[Math.floor(Math.random() * bestiary.length)];
             combat.start(randomEnemy);
@@ -140,6 +151,9 @@ const game = {
     }
 };
 
+// ==========================================
+// GERENCIADOR VISUAL (UI) COM AUTO-SCROLL CORRIGIDO
+// ==========================================
 const ui = {
     log(message, className = "") {
         const container = document.getElementById('log-window');
@@ -149,11 +163,13 @@ const ui = {
         li.innerHTML = `> ${message}`;
         if (className) li.className = className;
         
-        // appendChild insere no FINAL da lista
         ul.appendChild(li);
         
-        // Força a rolagem do container para o fundo (Auto-Scroll)
-        container.scrollTop = container.scrollHeight;
+        // CORREÇÃO: O setTimeout dá tempo ao navegador para renderizar o novo "li" 
+        // antes de tentar calcular o tamanho total (scrollHeight) da janela.
+        setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+        }, 10); 
     },
 
     update() {
@@ -194,4 +210,5 @@ const ui = {
     }
 };
 
+// Inicia o Jogo
 ui.update();
