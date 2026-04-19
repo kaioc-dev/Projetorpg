@@ -8,21 +8,68 @@ window.audio = {
     attackSfx: new Audio('https://ia802804.us.archive.org/24/items/sword-swing/Sword%20Swing.mp3'),
     gruntSfx: new Audio('https://ia600204.us.archive.org/29/items/PainSoundEffect/Pain%20Sound%20Effect.mp3'),
     
+    // Flag para saber se a música já tentou tocar
+    bgmStarted: false,
+    
     init() {
-        this.bgm.loop = true; this.bgm.volume = 0.3; 
-        this.clickSfx.volume = 0.7; this.attackSfx.volume = 1.0; this.gruntSfx.volume = 0.8;
+        this.bgm.loop = true; 
+        this.bgm.volume = 0.3; 
+        this.clickSfx.volume = 0.7; 
+        this.attackSfx.volume = 1.0; 
+        this.gruntSfx.volume = 0.8;
     },
-    playBGM() { if(!this.muted) { this.bgm.play().catch(()=>{}); } },
-    playClick() { if(!this.muted) { this.clickSfx.currentTime = 0; this.clickSfx.play().catch(()=>{}); } },
-    playAttack() { if(!this.muted) { this.attackSfx.currentTime = 0; this.attackSfx.play().catch(()=>{}); } },
-    playGrunt() { if(!this.muted) { this.gruntSfx.currentTime = 0; this.gruntSfx.play().catch(()=>{}); } },
+    
+    // Função para iniciar a música de forma segura após interação
+    startBGM() {
+        if (!this.muted && !this.bgmStarted) {
+            let playPromise = this.bgm.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    this.bgmStarted = true;
+                }).catch(error => {
+                    console.log("Autoplay bloqueado. A música iniciará após o próximo clique.", error);
+                });
+            }
+        }
+    },
+
+    playClick() { 
+        if(!this.muted) { 
+            this.clickSfx.currentTime = 0; 
+            this.clickSfx.play().catch(()=>{}); 
+        } 
+    },
+    
+    playAttack() { 
+        if(!this.muted) { 
+            this.attackSfx.currentTime = 0; 
+            this.attackSfx.play().catch(()=>{}); 
+        } 
+    },
+    
+    playGrunt() { 
+        if(!this.muted) { 
+            this.gruntSfx.currentTime = 0; 
+            this.gruntSfx.play().catch(()=>{}); 
+        } 
+    },
+    
     toggleMute() {
         this.muted = !this.muted;
         document.getElementById('btn-sound').innerText = this.muted ? '🔇' : '🔊';
-        if(this.muted) this.bgm.pause(); else this.playBGM();
+        
+        if(this.muted) {
+            this.bgm.pause();
+        } else {
+            // Se foi desmutado, força o play independentemente da flag
+            this.bgm.play().catch(()=>{});
+            this.bgmStarted = true;
+        }
         this.playClick();
     }
 };
+
+// Inicializa os volumes, mas NÃO tenta tocar nada ainda
 window.audio.init();
 
 // ==========================================
@@ -179,9 +226,13 @@ window.game = {
                 document.getElementById('main-game-screen').classList.remove('hidden');
                 document.getElementById('top-menu').classList.remove('hidden');
                 
-                this.state = 'explore'; window.player.recalculateStats(); return true;
+                this.state = 'explore'; window.player.recalculateStats(); 
+                
+                // Tenta iniciar a música se carregar o save
+                window.audio.startBGM();
+                return true;
             }
-        } catch(e) { localStorage.removeItem('aethelgard_save'); } // Se der erro, reseta
+        } catch(e) { localStorage.removeItem('aethelgard_save'); } 
         return false;
     },
 
@@ -193,7 +244,11 @@ window.game = {
     },
 
     chooseClass(key) {
-        window.audio.playClick(); window.audio.playBGM();
+        window.audio.playClick(); 
+        
+        // Agora sim a música inicia com certeza, porque o usuário clicou em algo
+        window.audio.startBGM();
+        
         const cls = window.classesData[key]; window.player.classObj = cls;
         window.player.hp = cls.hp; window.player.maxHp = cls.hp; window.player.mp = cls.mp; window.player.maxMp = cls.mp;
         window.player.baseAtk = cls.atk; window.player.baseDef = cls.def; window.player.recalculateStats();
@@ -363,4 +418,18 @@ window.ui = {
     animate(id, cls) { const el = document.getElementById(id); if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 350); }
 };
 
-window.onload = () => { window.sys.setLang('pt'); if(window.game.loadGame()) document.getElementById('top-menu').classList.remove('hidden'); else document.getElementById('class-selection-screen').classList.remove('hidden'); };
+// O evento de click em qualquer lugar da tela também tenta disparar o áudio para garantir
+document.body.addEventListener('click', () => {
+    if (window.game.state !== 'menu' && !window.audio.bgmStarted) {
+        window.audio.startBGM();
+    }
+}, { once: true }); 
+
+window.onload = () => { 
+    window.sys.setLang('pt'); 
+    if(window.game.loadGame()) {
+        document.getElementById('top-menu').classList.remove('hidden'); 
+    } else {
+        document.getElementById('class-selection-screen').classList.remove('hidden'); 
+    }
+};
