@@ -1,29 +1,18 @@
 :root {
-    --bg-dungeon: #000;
-    --wood-dark: #1f110c;
-    --gold: #d4af37;
-    --iron: #7f8c8d;
-    --parchment: #e8dcc4;
-    --text-dark: #3e2723;
-    --text-light: #f5f5dc;
-    --hp-red: #8e0000;
-    --mp-blue: #6a1b9a; /* Cor da Mana (Roxo/Azul escuro) */
-    --xp-blue: #1565c0;
-    font-family: 'Metamorphous', cursive;
+    --bg-dungeon: #000; --wood-dark: #1f110c; --gold: #d4af37;
+    --iron: #7f8c8d; --parchment: #e8dcc4; --text-dark: #3e2723;
+    --text-light: #f5f5dc; --hp-red: #8e0000; --mp-blue: #6a1b9a;
+    --xp-blue: #1565c0; font-family: 'Metamorphous', cursive;
 }
 
 * { box-sizing: border-box; }
 
 body {
-    background-color: var(--bg-dungeon);
-    color: var(--text-light);
+    background-color: var(--bg-dungeon); color: var(--text-light);
     display: flex; justify-content: center; align-items: center;
-    margin: 0; padding: 0;
-    height: 100dvh; /* Tela cheia dinâmica para mobile */
-    overflow: hidden; /* Impede rolagem da página inteira, rola só dentro do jogo */
+    margin: 0; padding: 0; height: 100dvh; overflow: hidden;
 }
 
-/* O "Tabuleiro" do jogo ocupa 100% da tela no celular */
 .wood-board {
     width: 100%; height: 100dvh; max-width: 600px;
     background-color: var(--wood-dark);
@@ -34,7 +23,6 @@ body {
 
 h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color: var(--gold); margin: 0 0 10px 0; text-shadow: 2px 2px 4px #000; }
 
-/* Tela de Seleção */
 #class-selection-screen { display: flex; flex-direction: column; justify-content: center; height: 100%; }
 .class-grid { display: grid; grid-template-columns: 1fr; gap: 10px; overflow-y: auto; padding-bottom: 20px;}
 .class-card { cursor: pointer; transition: transform 0.2s; display: block; text-align: center; }
@@ -43,11 +31,10 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 
 #main-game-screen { display: flex; flex-direction: column; height: 100%; }
 
-/* Log Window */
 .dark-parchment {
     height: 130px; flex-shrink: 0; background: #1e1614;
     border: 2px solid #5d4037; border-radius: 5px; padding: 10px;
-    overflow-y: auto; scroll-behavior: smooth; margin-bottom: 15px;
+    overflow-y: auto; scroll-behavior: smooth; margin-bottom: 10px;
     box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
 }
 #game-log { margin: 0; padding: 0; }
@@ -57,7 +44,6 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 #game-log li.loot { color: #69f0ae; }
 #game-log li.skill { color: #b388ff; font-weight: bold; }
 
-/* Status Heroi e Botao do Inventário */
 .parchment {
     flex-shrink: 0; background-color: var(--parchment); color: var(--text-dark);
     padding: 10px; border: 2px solid #a68c53; border-radius: 5px;
@@ -67,13 +53,12 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 .parchment h2, .parchment h3 { color: #5e3a21; border-bottom: 1px solid #c2b280; padding-bottom: 5px; margin-bottom:5px; font-size: 1.1em;}
 .parchment p { margin: 2px 0; font-size: 0.85em; font-weight: bold; }
 
-.inventory-btn { background: rgba(0,0,0,0.05); padding: 5px 10px; border-radius: 5px; border: 1px dashed #a68c53; cursor: pointer; }
-.inventory-btn:active { background: rgba(0,0,0,0.1); }
+.inventory-btn { background: rgba(0,0,0,0.05); padding: 5px 10px; border-radius: 5px; border: 1px dashed #a68c53; cursor: pointer; transition: 0.2s;}
+.inventory-btn:active { background: rgba(0,0,0,0.1); transform: scale(0.95); }
 
-/* Barras (HP, MP, XP) */
 .bars { width: 140px; }
 .stat-row { margin-bottom: 4px; font-size: 0.75em; font-weight: bold; }
-.bar-container { width: 100%; background: #222; border-radius: 3px; height: 12px; position: relative; border: 1px solid #000; overflow: hidden; }
+.bar-container { width: 100%; background: #222; border-radius: 3px; height: 12px; position: relative; border: 1px solid #000; overflow: hidden; margin-top:2px; }
 .bar { height: 100%; transition: width 0.3s ease-out; }
 .hp { background: var(--hp-red); width: 100%; }
 .mp { background: var(--mp-blue); width: 100%; }
@@ -81,7 +66,6 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 .enemy-hp { background: #d32f2f; width: 100%; }
 .bar-text { position: absolute; width: 100%; text-align: center; font-size: 9px; color: white; top: 0; text-shadow: 1px 1px 0 #000; }
 
-/* Arena e Botões */
 .stone-bg { background: #1a1a1a; border: 3px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 10px; box-shadow: inset 0 0 20px #000; }
 .vs-container { display: flex; justify-content: space-around; align-items: center; margin-bottom: 10px; }
 .portrait-frame { width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 5px; font-size: 35px; background: #222; }
@@ -104,7 +88,7 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 .btn-medieval.skill { background: linear-gradient(to bottom, #4a148c, #311b92); border-color: #b388ff; }
 .btn-medieval.heal { background: linear-gradient(to bottom, #1b5e20, #004d40); border-color: #69f0ae; }
 
-/* MODAL DO INVENTÁRIO */
+/* MODAL E INVENTÁRIO */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
     background: rgba(0,0,0,0.85); z-index: 100;
@@ -112,14 +96,24 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 }
 .inventory-panel { flex-direction: column; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto;}
 .inventory-sections { width: 100%; margin-top: 15px; }
-.inv-category h3 { font-size: 1em; border-bottom: 1px dashed #a68c53; text-align: left;}
-.inv-category ul { padding-left: 20px; font-size: 0.9em; margin-bottom: 15px;}
-.inv-category li { margin-bottom: 5px; }
-.close-btn { width: 100%; margin-top: 10px; background: #3e2723; }
+.inv-category h3 { font-size: 1em; border-bottom: 1px dashed #a68c53; text-align: left; margin-bottom: 10px;}
+.inv-category ul { padding: 0; margin: 0; font-size: 0.85em; list-style: none;}
 
+/* Item no inventario */
+.inv-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(0,0,0,0.05); padding: 5px; margin-bottom: 5px;
+    border: 1px dashed #a68c53; border-radius: 4px;
+}
+.inv-btn {
+    background: #3e2723; color: white; border: 1px solid #c2b280;
+    padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.9em; font-weight: bold;
+}
+.inv-btn:active { background: #5d4037; }
+
+.close-btn { width: 100%; margin-top: 10px; background: #3e2723; }
 .hidden { display: none !important; }
 
-/* Animações */
 .anim-attack { animation: strike 0.3s ease-in-out; }
 @keyframes strike { 0% { transform: scale(1); } 50% { transform: scale(1.2) translateY(-10px); } 100% { transform: scale(1); } }
 .anim-shake { animation: shake 0.3s; border-color: red !important; }
