@@ -18,22 +18,22 @@
             <div class="class-grid">
                 <div class="class-card parchment" id="btn-cavaleiro">
                     <h2>🛡️ Cavaleiro</h2>
-                    <p>Vida alta, ataque balanceado.</p>
+                    <p>Defesa e Vida altas.</p>
                     <small>Skill: Golpe Duplo</small>
                 </div>
                 <div class="class-card parchment" id="btn-mago">
                     <h2>🧙‍♂️ Mago</h2>
-                    <p>Vida baixa, dano mágico letal.</p>
+                    <p>Dano mágico extremo, Defesa baixa.</p>
                     <small>Skill: Bola de Fogo</small>
                 </div>
                 <div class="class-card parchment" id="btn-arqueiro">
                     <h2>🏹 Arqueiro</h2>
-                    <p>Dano alto, críticos ágeis.</p>
+                    <p>Ataque veloz, Críticos altos.</p>
                     <small>Skill: Tiro Preciso</small>
                 </div>
                 <div class="class-card parchment" id="btn-anao">
                     <h2>🪓 Anão Guerreiro</h2>
-                    <p>Tanque implacável.</p>
+                    <p>O maior tanque do jogo.</p>
                     <small>Skill: Fúria</small>
                 </div>
             </div>
@@ -60,6 +60,10 @@
                         <div class="stat-row">
                             <span>🔵 Mana:</span>
                             <div class="bar-container mp-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div>
+                        </div>
+                        <div class="stat-row" style="margin-top: 5px;">
+                            <span style="color: #ffb300;">⚔️ Atk: <span id="atk-val">0</span></span> | 
+                            <span style="color: #90caf9;">🛡️ Def: <span id="def-val">0</span></span>
                         </div>
                         <div class="stat-row">
                             <span>🌟 EXP:</span>
@@ -114,17 +118,17 @@
 
     <div id="inventory-modal" class="modal-overlay hidden">
         <div class="parchment inventory-panel">
-            <h2>🎒 Seu Inventário</h2>
+            <h2>🎒 Gerenciador de Itens</h2>
             <button class="close-btn btn-medieval" id="btn-close-inv">❌ Fechar</button>
             
             <div class="inventory-sections">
                 <div class="inv-category">
-                    <h3>⚔️ Armas & Armaduras</h3>
-                    <ul id="inv-equip"><li>Vazio...</li></ul>
+                    <h3>🤺 Equipado Atual</h3>
+                    <ul id="inv-equipped"></ul>
                 </div>
-                <div class="inv-category">
-                    <h3>💎 Objetos & Espólios</h3>
-                    <ul id="inv-items"><li>Vazio...</li></ul>
+                <div class="inv-category" style="margin-top: 15px;">
+                    <h3>🎒 Sua Mochila</h3>
+                    <ul id="inv-bag"></ul>
                 </div>
             </div>
         </div>
