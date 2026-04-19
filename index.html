@@ -18,7 +18,7 @@
 
         <div id="class-selection-screen" class="screen-layout">
             <div class="title-glow"><h1>🗡️ Aethelgard</h1></div>
-            <p id="txt-choose" style="text-align: center; color: #f5f5dc; margin-bottom: 15px;">Escolha seu destino:</p>
+            <p style="text-align: center; color: #f5f5dc; margin-bottom: 15px;">Escolha seu destino:</p>
             <div class="class-grid">
                 <button class="class-card parchment" onclick="window.game.chooseClass('cavaleiro')">
                     <h2>🛡️ Cavaleiro</h2><p>Defesa e Vida altas.</p>
@@ -56,28 +56,31 @@
                     <div class="bars">
                         <div class="stat-row">❤️ <div class="bar-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div></div>
                         <div class="stat-row">🔵 <div class="bar-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div></div>
-                        <div class="stat-row" style="font-size: 0.75em; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 5px;">
+                        <div class="stat-row" style="font-size: 0.72em; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 5px;">
                             <span>⚔️ Atk: <span id="atk-val">0</span></span> <span>🛡️ Def: <span id="def-val">0</span></span>
                             <span>💪 For: <span id="str-val">0</span></span> <span>🏃 Vel: <span id="spd-val">0</span></span>
                             <span>🎯 Des: <span id="dex-val">0</span></span> <span>🗣️ Car: <span id="cha-val">0</span></span>
                         </div>
+                        <div class="stat-row" style="margin-top:5px;"><div class="bar-container xp-container"><div id="xp-bar" class="bar xp"></div></div></div>
                     </div>
                 </div>
                 <div class="inventory-btn" onclick="window.ui.openInventory()">
-                    <h3>🎒 Bolsa</h3>
-                    <p>💰 <b id="gold">0</b></p>
-                    <p>🧪 <b id="potions">3</b></p>
+                    <h3 style="font-size: 0.9em; margin:0;">🎒 Bolsa</h3>
+                    <p style="margin:2px 0;">💰 <b id="gold">0</b></p>
+                    <p style="margin:2px 0;">🧪 <b id="potions">3</b></p>
                 </div>
             </header>
 
-            <div id="battle-arena" class="hidden stone-bg">
-                <div class="vs-container">
-                    <div class="combatant" id="player-portrait"><div class="portrait-frame gold-frame" id="player-art-icon">🤺</div></div>
-                    <div class="vs-text">⚔️</div>
-                    <div class="combatant" id="enemy-portrait"><div class="portrait-frame iron-frame" id="enemy-art-icon">👺</div><span class="label enemy-label" id="enemy-name-display">Inimigo</span></div>
+            <main style="flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
+                <div id="battle-arena" class="hidden stone-bg">
+                    <div class="vs-container">
+                        <div class="combatant" id="player-portrait"><div class="portrait-frame gold-frame"><div class="portrait" id="player-art-icon">🤺</div></div><span class="label">Você</span></div>
+                        <div class="vs-text">⚔️</div>
+                        <div class="combatant" id="enemy-portrait"><div class="portrait-frame iron-frame"><div class="portrait" id="enemy-art-icon">👺</div></div><span class="label enemy-label" id="enemy-name-display">Inimigo</span></div>
+                    </div>
+                    <div class="bar-container enemy-hp-container"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div>
                 </div>
-                <div class="bar-container enemy-hp-container"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div>
-            </div>
+            </main>
 
             <div id="controls">
                 <div id="exploration-actions">
@@ -100,16 +103,16 @@
             <h2>🎒 Inventário</h2>
             <div class="inventory-sections">
                 <div class="inv-category"><h3>🤺 Equipado</h3><ul id="inv-equipped"></ul></div>
-                <div class="inv-category" style="margin-top: 10px;"><h3>📦 Mochila</h3><ul id="inv-bag"></ul></div>
+                <div class="inv-category" style="margin-top: 15px;"><h3>📦 Mochila</h3><ul id="inv-bag"></ul></div>
             </div>
             <button class="close-btn btn-medieval" onclick="window.ui.closeInventory()">❌ Voltar</button>
         </div>
     </div>
 
     <div id="event-modal" class="modal-overlay hidden">
-        <div class="parchment inventory-panel" style="text-align: center;">
-            <h2 id="event-title" style="color: #b71c1c;">📜 História</h2>
-            <p id="event-desc" style="margin: 20px 0; font-weight: bold;"></p>
+        <div class="parchment inventory-panel" style="text-align: center; padding: 25px;">
+            <h2 id="event-title" style="color: #b71c1c; font-family: 'Cinzel Decorative';">📜 História</h2>
+            <p id="event-desc" style="margin: 20px 0; font-weight: bold; line-height: 1.4;"></p>
             <div id="event-choices" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
     </div>
@@ -117,11 +120,9 @@
     <div id="settings-modal" class="modal-overlay hidden">
         <div class="parchment inventory-panel" style="text-align: center;">
             <h2>⚙️ Sistema</h2>
-            <div id="g_id_onload" data-client_id="SEU_ID.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
-            <div class="g_id_signin" data-type="standard"></div>
-            <button class="btn-medieval" style="margin-top: 20px; background: #1b5e20;" onclick="window.sys.exitSave()">💾 Salvar e Sair</button>
-            <button class="btn-medieval" style="margin-top: 10px; background: #b71c1c;" onclick="window.game.resetGame()">⚠️ Apagar Save</button>
-            <button class="btn-medieval" style="margin-top: 20px;" onclick="window.ui.closeSettings()">Voltar</button>
+            <button class="btn-medieval" style="background: #1b5e20;" onclick="window.sys.exitSave()">💾 Salvar e Sair</button>
+            <button class="btn-medieval" style="margin-top: 10px; background: #b71c1c;" onclick="window.game.resetGame()">⚠️ Resetar Jogo</button>
+            <button class="btn-medieval" style="margin-top: 20px;" onclick="window.ui.closeSettings()">Voltar ao Jogo</button>
         </div>
     </div>
 
