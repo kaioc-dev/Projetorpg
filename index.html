@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Engine Avançado</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <div class="character-info">
+                <h2>Herói - Nível <span id="lvl">1</span></h2>
+                <div class="bar-container tooltip" title="Experiência">
+                    <div id="xp-bar" class="bar xp"></div>
+                </div>
+            </div>
+            <div id="stats">
+                <div class="stat">❤️ HP: <span id="hp">100</span>/<span id="max-hp">100</span></div>
+                <div class="stat">🧪 Poções: <span id="potions">3</span></div>
+                <div class="stat">💰 Ouro: <span id="gold">0</span></div>
+            </div>
+        </header>
+
+        <main>
+            <div id="log-window">
+                <ul id="game-log">
+                    <li>Bem-vindo ao Reino! Escolha sua ação.</li>
+                </ul>
+            </div>
+
+            <div id="enemy-panel" class="hidden">
+                <h3>Inimigo: <span id="enemy-name">---</span></h3>
+                <div class="bar-container">
+                    <div id="enemy-hp-bar" class="bar enemy-hp"></div>
+                </div>
+            </div>
+        </main>
+
+        <div id="controls">
+            <div id="exploration-actions">
+                <button onclick="game.explore()">🌿 Explorar Floresta</button>
+                <button onclick="game.rest()">🛌 Pousada (10 Ouro)</button>
+                <button onclick="player.buyPotion()">🛒 Comprar Poção (20 Ouro)</button>
+            </div>
+            <div id="combat-actions" class="hidden">
+                <button class="btn-attack" onclick="combat.attack()">⚔️ Atacar</button>
+                <button class="btn-heal" onclick="player.usePotion()">🧪 Usar Poção</button>
+                <button class="btn-flee" onclick="combat.flee()">🏃 Fugir</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
