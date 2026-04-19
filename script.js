@@ -1,307 +1,258 @@
 // ==========================================
-// FUNÇÃO UTILITÁRIA DE ANIMAÇÃO
+// ESTADO GLOBAL DO JOGADOR
 // ==========================================
-function triggerAnimation(targetId, classToApply) {
-    const el = document.getElementById(targetId);
-    el.classList.remove(classToApply);
-    void el.offsetWidth; // Força renderização do navegador (restart da animação)
-    el.classList.add(classToApply);
-    
-    // Remove classe depois que a animação (0.3s-0.4s no CSS) terminar
-    setTimeout(() => {
-        el.classList.remove(classToApply);
-    }, 450);
-}
+const player = {
+    hp: 100,
+    maxHp: 100,
+    atk: 15,
+    lvl: 1,
+    xp: 0,
+    xpToNext: 50,
+    gold: 0,
+    potions: 3,
 
-// ==========================================
-// CLASSES (Orientação a Objetos)
-// ==========================================
-class Character {
-    constructor(name, hp, atk) {
-        this.name = name;
-        this.maxHp = hp;
-        this.hp = hp;
-        this.atk = atk;
-    }
-    isDead() { return this.hp <= 0; }
-}
-
-class Player extends Character {
-    constructor() {
-        super("Cavaleiro", 100, 18); // Aumentei o ataque base
-        this.lvl = 1;
-        this.xp = 0;
-        this.xpToNext = 50;
-        this.gold = 0;
-        this.potions = 3;
-    }
-
-    gainXp(amount) {
-        this.xp += amount;
-        ui.log(`🌟 Você obteve ${amount} EXP.`);
-        if (this.xp >= this.xpToNext) this.levelUp();
-        ui.update();
-    }
-
-    levelUp() {
-        this.lvl++;
-        this.xp -= this.xpToNext;
-        this.xpToNext = Math.floor(this.xpToNext * 1.6);
-        this.maxHp += 20;
-        this.hp = this.maxHp; // Cura ao subir de nivel
-        this.atk += 6;
-        ui.log(`🎊 <b>SUBIU DE NÍVEL!</b> Agora é nível ${this.lvl}!`, 'important');
-    }
+    heal(amount) {
+        this.hp = Math.min(this.hp + amount, this.maxHp);
+    },
 
     usePotion() {
-        if (this.potions > 0) {
-            if (this.hp === this.maxHp) return ui.log("Vida já está cheia.");
-            this.potions--;
-            const healAmount = 50;
-            this.hp = Math.min(this.hp + healAmount, this.maxHp);
-            ui.log(`🧪 Usou poção. Recuperou ${healAmount} Vida.`);
-            ui.update();
-            
-            // Se estiver em combate, perde o turno ao usar poção
-            if (game.state === 'combat') {
-                combat.enemyTurn();
-            }
-        } else {
-            ui.log("❌ Sem poções!");
+        if (this.potions <= 0) return ui.log("❌ Você não tem poções!", "dmg-taken");
+        if (this.hp === this.maxHp) return ui.log("Sua vida já está cheia.");
+        
+        this.potions--;
+        this.heal(40);
+        ui.log(`🧪 Bebeu poção e recuperou 40 de Vida.`, "loot");
+        ui.update();
+
+        // Passa o turno se estiver em combate
+        if (game.state === 'combat') {
+            setTimeout(() => combat.enemyTurn(), 800);
         }
-    }
+    },
 
     buyPotion() {
         if (this.gold >= 20) {
             this.gold -= 20;
             this.potions++;
-            ui.log("🛒 Comprou 1 poção rúnica.");
+            ui.log("🛒 Comprou 1 Poção Curativa.", "loot");
             ui.update();
         } else {
             ui.log("❌ Ouro insuficiente.");
         }
+    },
+
+    gainXp(amount) {
+        this.xp += amount;
+        if (this.xp >= this.xpToNext) {
+            this.lvl++;
+            this.xp -= this.xpToNext;
+            this.xpToNext = Math.floor(this.xpToNext * 1.5);
+            this.maxHp += 20;
+            this.hp = this.maxHp;
+            this.atk += 5;
+            ui.log(`🎊 NÍVEL UP! Você agora é nível ${this.lvl}!`, "loot");
+        }
     }
-}
+};
 
-class Enemy extends Character {
-    constructor(name, hp, atk, xpReward, goldReward, icon) {
-        super(name, hp, atk);
-        this.xpReward = xpReward;
-        this.goldReward = goldReward;
-        this.icon = icon; // Emoji/Ícone do inimigo
-    }
-}
-
-const player = new Player();
-
-// Banco de Dados de Inimigos
-const enemiesDB = [
-    { name: "Goblin Saqueador", hp: 35, atk: 7, xp: 20, gold: 10, icon: "👺" },
-    { name: "Lobo Das Neves", hp: 50, atk: 10, xp: 35, gold: 15, icon: "🐺" },
-    { name: "Orc Enfurecido", hp: 90, atk: 15, xp: 60, gold: 30, icon: "👹" },
-    { name: "Esqueleto Guerreiro", hp: 45, atk: 13, xp: 40, gold: 5, icon: "💀" }
+// ==========================================
+// BANCO DE MONSTROS
+// ==========================================
+const bestiary = [
+    { name: "Goblin Rastejante", maxHp: 30, atk: 5, xp: 25, gold: 10, icon: "👺" },
+    { name: "Lobo Faminto", maxHp: 45, atk: 8, xp: 40, gold: 15, icon: "🐺" },
+    { name: "Orc Saqueador", maxHp: 80, atk: 12, xp: 70, gold: 35, icon: "👹" },
+    { name: "Esqueleto Amaldiçoado", maxHp: 50, atk: 10, xp: 50, gold: 5, icon: "💀" }
 ];
 
 // ==========================================
-// CENTRAL DE COMBATE (Corrigido)
+// MOTOR DE COMBATE (CORRIGIDO)
 // ==========================================
 const combat = {
-    activeEnemy: null, // Onde o inimigo atual é guardado (CORREÇÃO)
+    enemy: null,
 
     start(enemyData) {
         game.state = 'combat';
+        // Cria uma cópia fresca do inimigo para não alterar o bestiário
+        this.enemy = { 
+            name: enemyData.name, 
+            hp: enemyData.maxHp, 
+            maxHp: enemyData.maxHp, 
+            atk: enemyData.atk, 
+            xp: enemyData.xp, 
+            gold: enemyData.gold, 
+            icon: enemyData.icon 
+        };
         
-        // Cria nova instância do inimigo baseada no banco de dados (CORREÇÃO)
-        this.activeEnemy = new Enemy(
-            enemyData.name, 
-            enemyData.hp, 
-            enemyData.atk, 
-            enemyData.xp, 
-            enemyData.gold, 
-            enemyData.icon
-        );
-        
-        ui.log(`⚠️ <b>${this.activeEnemy.name}</b> (${this.activeEnemy.icon}) apareceu!`);
-        ui.toggleCombatMode(true);
+        ui.log(`⚠️ UM <b>${this.enemy.name}</b> SURGIU!`, "dmg-taken");
+        ui.toggleMode(true);
         ui.update();
     },
 
     attack() {
-        if (!this.activeEnemy) return; // Segurança
+        // Validação de segurança: se não houver inimigo, não faz nada
+        if (!this.enemy || this.enemy.hp <= 0) return;
 
-        // --- TURNO DO JOGADOR ---
-        // Animação de ataque do jogador
-        triggerAnimation('player-portrait', 'anim-player-attack');
+        // Animação Jogador
+        ui.animate('player-portrait', 'anim-attack');
 
-        // Cálculo de dano (Ataque base + variação aleatória de 0 a 8)
-        const dmg = player.atk + Math.floor(Math.random() * 9);
-        this.activeEnemy.hp -= dmg;
+        // Dano do Jogador (Ataque base + rolagem de 0 a 5)
+        const damage = player.atk + Math.floor(Math.random() * 6);
+        this.enemy.hp -= damage;
         
-        ui.log(`⚔️ Você desferiu golpe de <b>${dmg}</b> dano.`);
-        
-        // Inimigo treme ao receber dano
-        triggerAnimation('enemy-portrait', 'anim-dmg-shake');
-        
+        ui.log(`⚔️ Você cortou o monstro causando <b>${damage}</b> de dano!`, "dmg-dealt");
+        ui.animate('enemy-portrait', 'anim-shake');
         ui.update();
 
-        // Checa se inimigo morreu
-        if (this.activeEnemy.isDead()) {
-            this.win();
+        // Desativa botões para evitar clique duplo
+        document.getElementById('combat-actions').style.pointerEvents = 'none';
+
+        if (this.enemy.hp <= 0) {
+            setTimeout(() => this.win(), 600);
         } else {
-            // Se inimigo não morreu, ele contra-ataca depois de um tempo
-            document.getElementById('combat-actions').style.opacity = "0.5"; // Desativa botões visualmente
-            document.getElementById('combat-actions').style.pointerEvents = "none";
-            
-            setTimeout(() => this.enemyTurn(), 800); // Atraso dramático
+            setTimeout(() => this.enemyTurn(), 800);
         }
     },
 
     enemyTurn() {
-        if (this.activeEnemy.isDead()) return; // Previne ataque se ele ja morreu
+        if (!this.enemy || player.hp <= 0) return;
 
-        // --- TURNO DO INIMIGO ---
-        // Animação de ataque do inimigo
-        triggerAnimation('enemy-portrait', 'anim-enemy-attack');
+        ui.animate('enemy-portrait', 'anim-attack');
 
-        // Cálculo de dano do inimigo
-        const enemyDmg = this.activeEnemy.atk + Math.floor(Math.random() * 5);
-        player.hp -= enemyDmg;
+        const enemyDamage = this.enemy.atk + Math.floor(Math.random() * 4);
+        player.hp -= enemyDamage;
         
-        ui.log(`🩸 <b>${this.activeEnemy.name}</b> causou ${enemyDmg} dano em você.`, 'danger');
-        
-        // Jogador treme ao receber dano
-        triggerAnimation('player-portrait', 'anim-dmg-shake');
-        
-        // Reativa botões de controle
-        document.getElementById('combat-actions').style.opacity = "1";
-        document.getElementById('combat-actions').style.pointerEvents = "auto";
-        
+        ui.log(`🩸 O monstro atacou! Você sofreu <b>${enemyDamage}</b> de dano.`, "dmg-taken");
+        ui.animate('player-portrait', 'anim-shake');
         ui.update();
 
-        // Checa se jogador morreu
-        if (player.isDead()) {
+        // Reativa botões
+        document.getElementById('combat-actions').style.pointerEvents = 'auto';
+
+        if (player.hp <= 0) {
             this.lose();
         }
     },
 
     flee() {
-        // 50% de chance de fugir
         if (Math.random() > 0.5) {
-            ui.log("🏃 Você fugiu desesperadamente!");
-            this.endCombat();
+            ui.log("🏃 Você fugiu para a escuridão da floresta.");
+            this.end();
         } else {
-            ui.log("🏃 Tentou fugir, mas o monstro bloqueou a passagem!");
-            this.enemyTurn();
+            ui.log("🏃 O monstro bloqueou seu caminho!", "dmg-taken");
+            // Desativa botões temporariamente enquanto o monstro ataca
+            document.getElementById('combat-actions').style.pointerEvents = 'none';
+            setTimeout(() => this.enemyTurn(), 800);
         }
     },
 
     win() {
-        ui.log(`🏆 <b>${this.activeEnemy.name}</b> foi derrotado!`, 'important');
-        player.gold += this.activeEnemy.goldReward;
-        player.gainXp(this.activeEnemy.xpReward);
-        ui.log(`💰 Saqueou ${this.activeEnemy.goldReward} ouro.`);
-        this.endCombat();
+        ui.log(`🏆 <b>Vitória!</b> O ${this.enemy.name} caiu.`, "loot");
+        ui.log(`💰 Coletou ${this.enemy.gold} ouro e ${this.enemy.xp} EXP.`, "loot");
+        
+        player.gold += this.enemy.gold;
+        player.gainXp(this.enemy.xp);
+        
+        this.end();
     },
 
     lose() {
-        ui.log(`💀 <b>A MORTE TE ALCANÇOU...</b> O Reino chora sua perda.`, 'danger');
-        ui.log(`O jogo reiniciará em breve.`, 'important');
-        document.getElementById('combat-actions').classList.add('hidden');
-        
-        // Reinicia o jogo após 4 segundos
+        ui.log(`💀 <b>VOCÊ MORREU.</b> A escuridão o consome.`, "dmg-taken");
+        document.getElementById('combat-actions').style.display = 'none';
         setTimeout(() => location.reload(), 4000);
     },
 
-    endCombat() {
+    end() {
         game.state = 'explore';
-        this.activeEnemy = null; // Limpa inimigo ativo (CORREÇÃO)
-        ui.toggleCombatMode(false);
+        this.enemy = null;
+        document.getElementById('combat-actions').style.pointerEvents = 'auto'; // Segurança
+        ui.toggleMode(false);
         ui.update();
     }
 };
 
 // ==========================================
-// INTERFACE DE USUÁRIO (UI)
-// ==========================================
-const ui = {
-    logEl: document.getElementById('game-log'),
-
-    log(msg, styleClass = '') {
-        const entry = document.createElement('li');
-        entry.innerHTML = `> ${msg}`;
-        if (styleClass) entry.classList.add(styleClass);
-        this.logEl.prepend(entry);
-    },
-
-    update() {
-        // Atualiza status do jogador
-        document.getElementById('hp').innerText = player.hp;
-        document.getElementById('max-hp').innerText = player.maxHp;
-        document.getElementById('lvl').innerText = player.lvl;
-        document.getElementById('gold').innerText = player.gold;
-        document.getElementById('potions').innerText = player.potions;
-
-        // Atualiza barras visuais
-        const hpPercent = (player.hp / player.maxHp) * 100;
-        document.getElementById('hp-bar').style.width = `${hpPercent}%`;
-        
-        const xpPercent = (player.xp / player.xpToNext) * 100;
-        document.getElementById('xp-bar').style.width = `${xpPercent}%`;
-
-        // Se estiver em combate, atualiza HUD do inimigo (CORREÇÃO: acessando combat.activeEnemy)
-        if (combat.activeEnemy) {
-            document.getElementById('enemy-name-display').innerText = combat.activeEnemy.name;
-            document.getElementById('enemy-art-icon').innerText = combat.activeEnemy.icon;
-            
-            const enemyHpPercent = Math.max(0, (combat.activeEnemy.hp / combat.activeEnemy.maxHp) * 100);
-            document.getElementById('enemy-hp-bar').style.width = `${enemyHpPercent}%`;
-        }
-    },
-
-    toggleCombatMode(active) {
-        document.getElementById('exploration-actions').classList.toggle('hidden', active);
-        document.getElementById('combat-actions').classList.toggle('hidden', !active);
-        document.getElementById('battle-arena').classList.toggle('hidden', !active);
-    }
-};
-
-// ==========================================
-// MOTOR DE EVENTOS GERAIS (Exploração)
+// REGRAS DE EXPLORAÇÃO
 // ==========================================
 const game = {
     state: 'explore',
 
     explore() {
-        // 60% de chance de encontro de batalha
         if (Math.random() > 0.4) {
-            this.startCombatEncounter();
+            const randomEnemy = bestiary[Math.floor(Math.random() * bestiary.length)];
+            combat.start(randomEnemy);
         } else {
-            // Evento pacífico: achou ouro
-            const foundGold = Math.floor(Math.random() * 10) + 2;
+            const foundGold = Math.floor(Math.random() * 15) + 5;
             player.gold += foundGold;
-            ui.log(`🌲 Explorando floresta... Achou um baú velho com ${foundGold} moedas💰.`, 'important');
+            ui.log(`🌲 Encontrou um viajante morto. Saqueou ${foundGold} ouro.`, "loot");
             ui.update();
         }
-    },
-
-    startCombatEncounter() {
-        // Sorteia inimigo do DB
-        const enemyTemplate = enemiesDB[Math.floor(Math.random() * enemiesDB.length)];
-        combat.start(enemyTemplate); // Passa os dados para o motor de combate (CORREÇÃO)
     },
 
     rest() {
         if (player.gold >= 10) {
-            if (player.hp === player.maxHp) return ui.log("Você já está descansado.");
+            if (player.hp === player.maxHp) return ui.log("Sua saúde já está perfeita.");
             player.gold -= 10;
             player.hp = player.maxHp;
-            ui.log(`🛌 Dormiu na pousada (+10💰). Vida totalmente restaurada!`, 'important');
+            ui.log(`🛌 Descansou na pousada. Saúde restaurada!`, "loot");
             ui.update();
         } else {
-            ui.log("❌ Ouro insuficiente para a pousada.");
+            ui.log("❌ O estalajadeiro o expulsou. Faltam moedas.");
         }
     }
 };
 
-// Inicialização
+// ==========================================
+// GERENCIADOR VISUAL (UI)
+// ==========================================
+const ui = {
+    log(message, className = "") {
+        const ul = document.getElementById('game-log');
+        const li = document.createElement('li');
+        li.innerHTML = `> ${message}`;
+        if (className) li.className = className;
+        ul.prepend(li);
+    },
+
+    update() {
+        // Status Herói
+        document.getElementById('hp').innerText = Math.max(0, player.hp);
+        document.getElementById('max-hp').innerText = player.maxHp;
+        document.getElementById('lvl').innerText = player.lvl;
+        document.getElementById('gold').innerText = player.gold;
+        document.getElementById('potions').innerText = player.potions;
+
+        // Barras Herói
+        const hpPct = Math.max(0, (player.hp / player.maxHp) * 100);
+        document.getElementById('hp-bar').style.width = `${hpPct}%`;
+        const xpPct = Math.min(100, (player.xp / player.xpToNext) * 100);
+        document.getElementById('xp-bar').style.width = `${xpPct}%`;
+
+        // HUD Combate
+        if (combat.enemy) {
+            document.getElementById('enemy-name-display').innerText = combat.enemy.name;
+            document.getElementById('enemy-art-icon').innerText = combat.enemy.icon;
+            
+            const enemyHpPct = Math.max(0, (combat.enemy.hp / combat.enemy.maxHp) * 100);
+            document.getElementById('enemy-hp-bar').style.width = `${enemyHpPct}%`;
+        }
+    },
+
+    toggleMode(isCombat) {
+        document.getElementById('exploration-actions').classList.toggle('hidden', isCombat);
+        document.getElementById('combat-actions').classList.toggle('hidden', !isCombat);
+        document.getElementById('battle-arena').classList.toggle('hidden', !isCombat);
+    },
+
+    animate(elementId, animationClass) {
+        const el = document.getElementById(elementId);
+        if(!el) return;
+        el.classList.remove(animationClass);
+        void el.offsetWidth; // Força re-render
+        el.classList.add(animationClass);
+        setTimeout(() => el.classList.remove(animationClass), 350);
+    }
+};
+
+// Renderização inicial
 ui.update();
