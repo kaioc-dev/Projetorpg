@@ -1,6 +1,3 @@
-// ==========================================
-// SISTEMA DE ÁUDIO (Caminhos Locais - OBRIGATÓRIO PARA O GITHUB)
-// ==========================================
 window.audio = {
     muted: false,
     bgm: new Audio('bgm.mp3'), 
@@ -25,52 +22,27 @@ window.audio = {
                 playPromise.then(() => {
                     this.bgmStarted = true;
                 }).catch(error => {
-                    console.log("Áudio aguardando interação direta do usuário.");
+                    console.log("Áudio aguardando interação.");
                 });
             }
         }
     },
 
-    playClick() { 
-        if(!this.muted) { 
-            this.clickSfx.currentTime = 0; 
-            this.clickSfx.play().catch(()=>{}); 
-        } 
-    },
-    
-    playAttack() { 
-        if(!this.muted) { 
-            this.attackSfx.currentTime = 0; 
-            this.attackSfx.play().catch(()=>{}); 
-        } 
-    },
-    
-    playGrunt() { 
-        if(!this.muted) { 
-            this.gruntSfx.currentTime = 0; 
-            this.gruntSfx.play().catch(()=>{}); 
-        } 
-    },
+    playClick() { if(!this.muted) { this.clickSfx.currentTime = 0; this.clickSfx.play().catch(()=>{}); } },
+    playAttack() { if(!this.muted) { this.attackSfx.currentTime = 0; this.attackSfx.play().catch(()=>{}); } },
+    playGrunt() { if(!this.muted) { this.gruntSfx.currentTime = 0; this.gruntSfx.play().catch(()=>{}); } },
     
     toggleMute() {
         this.muted = !this.muted;
         document.getElementById('btn-sound').innerText = this.muted ? '🔇' : '🔊';
-        
-        if(this.muted) {
-            this.bgm.pause();
-        } else {
-            this.bgm.play().catch(()=>{});
-            this.bgmStarted = true;
-        }
+        if(this.muted) { this.bgm.pause(); } 
+        else { this.bgm.play().catch(()=>{}); this.bgmStarted = true; }
         this.playClick();
     }
 };
 
 window.audio.init();
 
-// ==========================================
-// IDIOMAS DA INTERFACE (Traduções)
-// ==========================================
 window.lang = 'pt';
 const i18n = {
     pt: {
@@ -123,9 +95,6 @@ window.sys = {
     exitSave() { window.audio.playClick(); window.game.saveGame(); location.reload(); }
 };
 
-// ==========================================
-// DADOS DE JOGO E JOGADOR
-// ==========================================
 window.classesData = {
     cavaleiro: { name: "Cavaleiro", icon: "🛡️", hp: 120, mp: 20, atk: 10, def: 5, skillName: "Golpe Duplo", skillCost: 10, skillMult: 2.0 },
     mago: { name: "Mago", icon: "🧙‍♂️", hp: 70, mp: 60, atk: 6, def: 1, skillName: "Bola de Fogo", skillCost: 20, skillMult: 3.5 },
