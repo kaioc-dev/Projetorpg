@@ -2,96 +2,130 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crônicas de Aethelgard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aethelgard RPG</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Metamorphous&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+
     <div id="game-container" class="wood-board">
-        <div class="corner top-left"></div>
-        <div class="corner top-right"></div>
-        <div class="corner bottom-left"></div>
-        <div class="corner bottom-right"></div>
-
-        <div class="game-header-ornament">
+        
+        <div id="class-selection-screen">
             <h1>🗡️ Aethelgard</h1>
+            <p style="text-align: center; color: #f5f5dc;">Escolha seu destino:</p>
+            
+            <div class="class-grid">
+                <div class="class-card parchment" onclick="game.chooseClass('cavaleiro')">
+                    <h2>🛡️ Cavaleiro</h2>
+                    <p>Vida alta, ataque balanceado.</p>
+                    <small>Skill: Golpe Duplo</small>
+                </div>
+                <div class="class-card parchment" onclick="game.chooseClass('mago')">
+                    <h2>🧙‍♂️ Mago</h2>
+                    <p>Vida baixa, dano mágico letal.</p>
+                    <small>Skill: Bola de Fogo</small>
+                </div>
+                <div class="class-card parchment" onclick="game.chooseClass('arqueiro')">
+                    <h2>🏹 Arqueiro</h2>
+                    <p>Dano alto, críticos ágeis.</p>
+                    <small>Skill: Tiro Preciso</small>
+                </div>
+                <div class="class-card parchment" onclick="game.chooseClass('anao')">
+                    <h2>🪓 Anão Guerreiro</h2>
+                    <p>Tanque implacável.</p>
+                    <small>Skill: Fúria</small>
+                </div>
+            </div>
         </div>
 
-        <div id="log-window" class="dark-parchment">
-            <ul id="game-log">
-                <li>Sua lenda começa... O que deseja fazer?</li>
-            </ul>
+        <div id="main-game-screen" class="hidden">
+            <div class="game-header-ornament">
+                <h1 style="font-size: 1.5em; margin-bottom: 5px;">Aethelgard</h1>
+            </div>
+
+            <div id="log-window" class="dark-parchment">
+                <ul id="game-log"></ul>
+            </div>
+
+            <header id="hero-status" class="parchment">
+                <div class="status-box">
+                    <h2><span id="hero-icon">🛡️</span> <span id="hero-class-name">Herói</span> <span style="font-size:0.6em; color:#555;">Nvl <span id="lvl">1</span></span></h2>
+                    
+                    <div class="bars">
+                        <div class="stat-row">
+                            <span>❤️ Vida:</span>
+                            <div class="bar-container hp-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div>
+                        </div>
+                        <div class="stat-row">
+                            <span>🔵 Mana:</span>
+                            <div class="bar-container mp-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div>
+                        </div>
+                        <div class="stat-row">
+                            <span>🌟 EXP:</span>
+                            <div class="bar-container xp-container"><div id="xp-bar" class="bar xp"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="inventory-btn" onclick="ui.openInventory()">
+                    <h3>🎒 Bolsa</h3>
+                    <p>💰 Ouro: <b id="gold">0</b></p>
+                    <p>🧪 Poções: <b id="potions">3</b></p>
+                    <p style="font-size: 0.7em; text-align: center; color: #8e1d1d; margin-top:5px;">(Toque para abrir)</p>
+                </div>
+            </header>
+
+            <main style="flex-grow: 1;">
+                <div id="battle-arena" class="hidden stone-bg">
+                    <div class="vs-container">
+                        <div class="combatant" id="player-portrait">
+                            <div class="portrait-frame gold-frame"><div class="portrait hero-art" id="player-art-icon">🤺</div></div>
+                            <span class="label">Você</span>
+                        </div>
+                        <div class="vs-text">⚔️</div>
+                        <div class="combatant" id="enemy-portrait">
+                            <div class="portrait-frame iron-frame"><div class="portrait enemy-art" id="enemy-art-icon">👺</div></div>
+                            <span class="label enemy-label" id="enemy-name-display">Monstro</span>
+                        </div>
+                    </div>
+                    <div id="enemy-hud">
+                        <div class="bar-container enemy-hp-container"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div>
+                    </div>
+                </div>
+            </main>
+
+            <div id="controls">
+                <div id="exploration-actions">
+                    <button class="btn-medieval" onclick="game.explore()">🌲 Explorar</button>
+                    <button class="btn-medieval" onclick="game.rest()">🛌 Pousada (10💰)</button>
+                    <button class="btn-medieval purchase" onclick="player.buyPotion()">🛒 Comprar Poção (20💰)</button>
+                </div>
+                <div id="combat-actions" class="hidden">
+                    <button class="btn-medieval attack" onclick="combat.attack()">⚔️ Atacar!</button>
+                    <button class="btn-medieval skill" onclick="combat.useSkill()">✨ <span id="skill-name">Poder</span></button>
+                    <button class="btn-medieval heal" onclick="player.usePotion()">🧪 Poção</button>
+                    <button class="btn-medieval flee" onclick="combat.flee()">🏃 Fugir</button>
+                </div>
+            </div>
         </div>
+        
+    </div>
 
-        <header id="hero-status" class="parchment">
-            <div class="status-box">
-                <h2>🛡️ Herói Nível <span id="lvl">1</span></h2>
-                
-                <div class="bars">
-                    <div class="stat-row">
-                        <span>❤️ Vida:</span>
-                        <div class="bar-container hp-container">
-                            <div id="hp-bar" class="bar hp"></div>
-                            <span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span>
-                        </div>
-                    </div>
-                    <div class="stat-row">
-                        <span>🌟 EXP:</span>
-                        <div class="bar-container xp-container">
-                            <div id="xp-bar" class="bar xp"></div>
-                        </div>
-                    </div>
+    <div id="inventory-modal" class="modal-overlay hidden">
+        <div class="parchment inventory-panel">
+            <h2>🎒 Seu Inventário</h2>
+            <button class="close-btn btn-medieval" onclick="ui.closeInventory()">❌ Fechar</button>
+            
+            <div class="inventory-sections">
+                <div class="inv-category">
+                    <h3>⚔️ Armas & Armaduras</h3>
+                    <ul id="inv-equip"><li>Vazio...</li></ul>
                 </div>
-            </div>
-
-            <div class="inventory">
-                <h3>🎒 Bolsa</h3>
-                <p>💰 Ouro: <b id="gold">0</b></p>
-                <p>🧪 Poções: <b id="potions">3</b></p>
-            </div>
-        </header>
-
-        <main>
-            <div id="battle-arena" class="hidden stone-bg">
-                <div class="vs-container">
-                    <div class="combatant" id="player-portrait">
-                        <div class="portrait-frame gold-frame">
-                            <div class="portrait hero-art">🤺</div>
-                        </div>
-                        <span class="label">Você</span>
-                    </div>
-                    
-                    <div class="vs-text">⚔️</div>
-                    
-                    <div class="combatant" id="enemy-portrait">
-                        <div class="portrait-frame iron-frame">
-                            <div class="portrait enemy-art" id="enemy-art-icon">👺</div>
-                        </div>
-                        <span class="label enemy-label" id="enemy-name-display">Monstro</span>
-                        <span class="label" style="color: #ffaa00; font-size: 0.7em;">Nvl <span id="enemy-lvl-display">1</span></span>
-                    </div>
+                <div class="inv-category">
+                    <h3>💎 Objetos & Espólios</h3>
+                    <ul id="inv-items"><li>Vazio...</li></ul>
                 </div>
-
-                <div id="enemy-hud">
-                    <div class="bar-container enemy-hp-container">
-                        <div id="enemy-hp-bar" class="bar enemy-hp"></div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <div id="controls">
-            <div id="exploration-actions">
-                <button class="btn-medieval" onclick="game.explore()">🌲 Explorar</button>
-                <button class="btn-medieval" onclick="game.rest()">🛌 Pousada (10💰)</button>
-                <button class="btn-medieval purchase" onclick="player.buyPotion()">🛒 Comprar Poção (20💰)</button>
-            </div>
-            <div id="combat-actions" class="hidden">
-                <button class="btn-medieval attack" onclick="combat.attack()">⚔️ Atacar!</button>
-                <button class="btn-medieval heal" onclick="player.usePotion()">🧪 Poção</button>
-                <button class="btn-medieval flee" onclick="combat.flee()">🏃 Fugir</button>
             </div>
         </div>
     </div>
