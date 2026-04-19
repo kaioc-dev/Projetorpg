@@ -32,7 +32,7 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 #main-game-screen { display: flex; flex-direction: column; height: 100%; }
 
 .dark-parchment {
-    height: 130px; flex-shrink: 0; background: #1e1614;
+    height: 120px; flex-shrink: 0; background: #1e1614;
     border: 2px solid #5d4037; border-radius: 5px; padding: 10px;
     overflow-y: auto; scroll-behavior: smooth; margin-bottom: 10px;
     box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
@@ -43,6 +43,7 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 #game-log li.dmg-taken { color: #ff5252; font-weight: bold; }
 #game-log li.loot { color: #69f0ae; }
 #game-log li.skill { color: #b388ff; font-weight: bold; }
+#game-log li.sys { color: #81d4fa; font-style: italic; }
 
 .parchment {
     flex-shrink: 0; background-color: var(--parchment); color: var(--text-dark);
@@ -75,7 +76,7 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 .enemy-label { color: #ff6b6b; font-weight: bold; }
 
 #controls { margin-top: auto; padding-bottom: 10px; }
-#exploration-actions, #combat-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#exploration-actions, #combat-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .purchase, .flee { grid-column: span 2; }
 
 .btn-medieval {
@@ -88,6 +89,12 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 .btn-medieval.skill { background: linear-gradient(to bottom, #4a148c, #311b92); border-color: #b388ff; }
 .btn-medieval.heal { background: linear-gradient(to bottom, #1b5e20, #004d40); border-color: #69f0ae; }
 
+/* Botões do Sistema (Salvar/Resetar) */
+#system-actions { display: flex; gap: 10px; }
+.btn-sys { flex: 1; padding: 8px; font-family: 'Cinzel Decorative', serif; font-size: 0.7em; cursor: pointer; border-radius: 4px; background: #3e2723; color: #ccc; border: 1px solid #5d4037;}
+.btn-reset { background: #310c0c; color: #ff8a80; border-color: #7f0000; }
+.btn-sys:active { filter: brightness(1.2); }
+
 /* MODAL E INVENTÁRIO */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
@@ -99,7 +106,6 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 .inv-category h3 { font-size: 1em; border-bottom: 1px dashed #a68c53; text-align: left; margin-bottom: 10px;}
 .inv-category ul { padding: 0; margin: 0; font-size: 0.85em; list-style: none;}
 
-/* Item no inventario */
 .inv-item {
     display: flex; justify-content: space-between; align-items: center;
     background: rgba(0,0,0,0.05); padding: 5px; margin-bottom: 5px;
