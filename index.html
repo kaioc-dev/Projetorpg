@@ -12,7 +12,6 @@
     <div id="game-container" class="wood-board">
         
         <div id="top-menu" class="hidden">
-            <button class="btn-medieval top-btn" id="btn-sound" onclick="window.audio.toggleMute()" title="Ativar/Desativar Som">🔊</button>
             <button class="btn-medieval top-btn" id="btn-settings" onclick="window.ui.openSettings()" title="Configurações do Sistema">⚙️</button>
         </div>
 
@@ -131,12 +130,16 @@
         <div class="parchment inventory-panel" style="text-align: center;">
             <h2 id="txt-settings-title">⚙️ Sistema</h2>
             
-            <div style="margin: 20px 0;">
+            <div style="margin: 15px 0;">
                 <h3 id="txt-lang" style="font-size: 0.9em; margin-bottom: 10px; color: #4e342e;">Idioma / Language</h3>
                 <div style="display:flex; gap:10px;">
                     <button class="btn-sys" style="flex:1;" onclick="window.sys.setLang('pt')">🇧🇷 PT-BR</button>
                     <button class="btn-sys" style="flex:1;" onclick="window.sys.setLang('en')">🇺🇸 EN</button>
                 </div>
+            </div>
+
+            <div style="margin: 15px 0; border-top: 1px dashed rgba(139, 107, 74, 0.5); padding-top: 15px;">
+                <button class="btn-sys" style="width: 100%;" id="btn-sound-settings" onclick="window.audio.toggleMute()">🔊 Som Ativado</button>
             </div>
 
             <div style="margin-top: 25px; display:flex; flex-direction:column; gap:15px;">
