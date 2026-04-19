@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aethelgard RPG</title>
+    <title>Crônicas de Aethelgard</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Metamorphous&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,89 +13,58 @@
         
         <div id="class-selection-screen">
             <h1>🗡️ Aethelgard</h1>
-            <p style="text-align: center; color: #f5f5dc;">Escolha seu destino:</p>
-            
+            <p style="text-align: center; color: #f5f5dc;">Escolhe a tua Classe:</p>
             <div class="class-grid">
                 <button class="class-card parchment" onclick="window.game.chooseClass('cavaleiro')">
                     <h2>🛡️ Cavaleiro</h2>
-                    <p>Defesa e Vida altas.</p>
-                    <small>Skill: Golpe Duplo</small>
+                    <p>Foco em Defesa e Vida.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('mago')">
                     <h2>🧙‍♂️ Mago</h2>
-                    <p>Dano mágico extremo, Defesa baixa.</p>
-                    <small>Skill: Bola de Fogo</small>
+                    <p>Dano Mágico e muita Mana.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('arqueiro')">
                     <h2>🏹 Arqueiro</h2>
-                    <p>Ataque veloz, Críticos altos.</p>
-                    <small>Skill: Tiro Preciso</small>
+                    <p>Ataque rápido e Críticos.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('anao')">
-                    <h2>🪓 Anão Guerreiro</h2>
-                    <p>O maior tanque do jogo.</p>
-                    <small>Skill: Fúria</small>
+                    <h2>🪓 Anão</h2>
+                    <p>O mestre da sobrevivência.</p>
                 </button>
             </div>
         </div>
 
         <div id="main-game-screen" class="hidden">
-            <div class="game-header-ornament">
-                <h1 style="font-size: 1.5em; margin-bottom: 5px;">Aethelgard</h1>
-            </div>
-
             <div id="log-window" class="dark-parchment">
                 <ul id="game-log"></ul>
             </div>
 
             <header id="hero-status" class="parchment">
                 <div class="status-box">
-                    <h2><span id="hero-icon">🛡️</span> <span id="hero-class-name">Herói</span> <span style="font-size:0.6em; color:#555;">Nvl <span id="lvl">1</span></span></h2>
-                    
+                    <h2><span id="hero-icon">🛡️</span> <span id="hero-class-name">Herói</span> <small>Nvl <span id="lvl">1</span></small></h2>
                     <div class="bars">
-                        <div class="stat-row">
-                            <span>❤️ Vida:</span>
-                            <div class="bar-container hp-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div>
+                        <div class="stat-row">❤️ <div class="bar-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div></div>
+                        <div class="stat-row">🔵 <div class="bar-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div></div>
+                        <div class="stat-row" style="margin-top:5px; font-size: 0.8em; color: #4e342e;">
+                            ⚔️ <span id="atk-val">0</span> | 🛡️ <span id="def-val">0</span>
                         </div>
-                        <div class="stat-row">
-                            <span>🔵 Mana:</span>
-                            <div class="bar-container mp-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div>
-                        </div>
-                        <div class="stat-row" style="margin-top: 5px;">
-                            <span style="color: #ffb300;">⚔️ Atk: <span id="atk-val">0</span></span> | 
-                            <span style="color: #90caf9;">🛡️ Def: <span id="def-val">0</span></span>
-                        </div>
-                        <div class="stat-row">
-                            <span>🌟 EXP:</span>
-                            <div class="bar-container xp-container"><div id="xp-bar" class="bar xp"></div></div>
-                        </div>
+                        <div class="bar-container xp-container"><div id="xp-bar" class="bar xp"></div></div>
                     </div>
                 </div>
-
                 <div class="inventory-btn" onclick="window.ui.openInventory()">
                     <h3>🎒 Bolsa</h3>
-                    <p>💰 Ouro: <b id="gold">0</b></p>
-                    <p>🧪 Poções: <b id="potions">3</b></p>
-                    <p style="font-size: 0.7em; text-align: center; color: #8e1d1d; margin-top:5px;">(Toque para abrir)</p>
+                    <p>💰 <b id="gold">0</b> | 🧪 <b id="potions">3</b></p>
                 </div>
             </header>
 
             <main style="flex-grow: 1;">
                 <div id="battle-arena" class="hidden stone-bg">
                     <div class="vs-container">
-                        <div class="combatant" id="player-portrait">
-                            <div class="portrait-frame gold-frame"><div class="portrait hero-art" id="player-art-icon">🤺</div></div>
-                            <span class="label">Você</span>
-                        </div>
-                        <div class="vs-text">⚔️</div>
-                        <div class="combatant" id="enemy-portrait">
-                            <div class="portrait-frame iron-frame"><div class="portrait enemy-art" id="enemy-art-icon">👺</div></div>
-                            <span class="label enemy-label" id="enemy-name-display">Monstro</span>
-                        </div>
+                        <div class="combatant" id="player-portrait"><div class="portrait-frame gold-frame">🤺</div><span>Tu</span></div>
+                        <div class="vs-text">VS</div>
+                        <div class="combatant" id="enemy-portrait"><div class="portrait-frame iron-frame" id="enemy-art-icon">👺</div><span id="enemy-name-display">...</span></div>
                     </div>
-                    <div id="enemy-hud">
-                        <div class="bar-container enemy-hp-container"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div>
-                    </div>
+                    <div class="bar-container" style="width:80%; margin: 0 auto;"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div>
                 </div>
             </main>
 
@@ -106,36 +75,31 @@
                     <button class="btn-medieval purchase" onclick="window.player.buyPotion()">🛒 Comprar Poção (20💰)</button>
                 </div>
                 <div id="combat-actions" class="hidden">
-                    <button class="btn-medieval attack" onclick="window.combat.attack()">⚔️ Atacar!</button>
+                    <button class="btn-medieval attack" onclick="window.combat.attack()">⚔️ Atacar</button>
                     <button class="btn-medieval skill" onclick="window.combat.useSkill()">✨ <span id="skill-name">Poder</span></button>
                     <button class="btn-medieval heal" onclick="window.player.usePotion()">🧪 Poção</button>
                     <button class="btn-medieval flee" onclick="window.combat.flee()">🏃 Fugir</button>
                 </div>
-
-                <div id="system-actions">
+                <div id="system-menu">
                     <button class="btn-sys" onclick="window.game.saveGame()">💾 Salvar</button>
-                    <button class="btn-sys btn-reset" onclick="window.game.resetGame()">🔄 Resetar Jogo</button>
+                    <button class="btn-sys reset" onclick="window.game.resetGame()">🔄 Reset</button>
                 </div>
             </div>
         </div>
-        
     </div>
 
     <div id="inventory-modal" class="modal-overlay hidden">
         <div class="parchment inventory-panel">
-            <h2>🎒 Gerenciador de Itens</h2>
-            <button class="close-btn btn-medieval" onclick="window.ui.closeInventory()">❌ Fechar</button>
-            
-            <div class="inventory-sections">
-                <div class="inv-category">
-                    <h3>🤺 Equipado Atual</h3>
-                    <ul id="inv-equipped"></ul>
-                </div>
-                <div class="inv-category" style="margin-top: 15px;">
-                    <h3>🎒 Sua Mochila</h3>
-                    <ul id="inv-bag"></ul>
-                </div>
+            <h2>🎒 Inventário</h2>
+            <div class="inv-category">
+                <h3>🤺 Equipado</h3>
+                <ul id="inv-equipped"></ul>
             </div>
+            <div class="inv-category">
+                <h3>📦 Mochila</h3>
+                <ul id="inv-bag"></ul>
+            </div>
+            <button class="btn-medieval" style="width:100%" onclick="window.ui.closeInventory()">Fechar</button>
         </div>
     </div>
 
