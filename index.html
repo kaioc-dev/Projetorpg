@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Aethelgard RPG</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Metamorphous&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -13,111 +13,83 @@
     <div id="game-container" class="wood-board">
         
         <div id="top-menu" class="hidden">
-            <button class="btn-medieval top-btn" id="btn-settings" onclick="window.ui.openSettings()" title="Configurações do Sistema">⚙️</button>
+            <button class="btn-medieval top-btn" id="btn-settings" onclick="window.ui.openSettings()">⚙️</button>
         </div>
 
         <div id="class-selection-screen" class="screen-layout">
-            <div class="title-glow">
-                <h1>🗡️ Aethelgard</h1>
-            </div>
-            <p id="txt-choose" style="text-align: center; color: #f5f5dc; text-shadow: 1px 1px 2px #000; margin-bottom: 15px;">Escolha seu destino:</p>
-            
+            <div class="title-glow"><h1>🗡️ Aethelgard</h1></div>
+            <p id="txt-choose" style="text-align: center; color: #f5f5dc; margin-bottom: 15px;">Escolha seu destino:</p>
             <div class="class-grid">
                 <button class="class-card parchment" onclick="window.game.chooseClass('cavaleiro')">
-                    <h2>🛡️ <span class="c-name">Cavaleiro</span></h2>
-                    <p class="c-desc">Defesa e Vida altas.</p>
+                    <h2>🛡️ Cavaleiro</h2><p>Defesa e Vida altas.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('mago')">
-                    <h2>🧙‍♂️ <span class="c-name">Mago</span></h2>
-                    <p class="c-desc">Dano mágico extremo.</p>
+                    <h2>🧙‍♂️ Mago</h2><p>Dano mágico extremo.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('arqueiro')">
-                    <h2>🏹 <span class="c-name">Arqueiro</span></h2>
-                    <p class="c-desc">Ataque veloz e crítico.</p>
+                    <h2>🏹 Arqueiro</h2><p>Ataque veloz e crítico.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('anao')">
-                    <h2>🪓 <span class="c-name">Anão</span></h2>
-                    <p class="c-desc">O maior tanque do jogo.</p>
+                    <h2>🪓 Anão</h2><p>O maior tanque do jogo.</p>
                 </button>
             </div>
         </div>
 
         <div id="name-selection-screen" class="hidden screen-layout">
-            <div class="title-glow">
-                <h1>✍️ Seu Legado</h1>
-            </div>
-            <p style="text-align: center; margin-bottom: 20px;">Como o herói será chamado?</p>
+            <div class="title-glow"><h1>✍️ Seu Legado</h1></div>
             <div style="text-align: center; padding: 0 20px;">
-                <input type="text" id="input-hero-name" placeholder="Digite seu nome..." maxlength="12" class="medieval-input" autocomplete="off">
-                <button class="btn-medieval" style="margin-top: 20px;" onclick="window.game.confirmName()">Avançar para a Batalha</button>
-                <button class="btn-medieval" style="margin-top: 10px; background: #3e2723; border-color: #1a0f0d;" onclick="window.game.cancelName()">Voltar</button>
+                <input type="text" id="input-hero-name" placeholder="Nome do herói..." maxlength="12" class="medieval-input">
+                <button class="btn-medieval" style="margin-top: 20px;" onclick="window.game.confirmName()">Avançar</button>
+                <button class="btn-medieval" style="margin-top: 10px; background: #3e2723;" onclick="window.game.cancelName()">Voltar</button>
             </div>
         </div>
 
         <div id="main-game-screen" class="hidden">
-            <div id="log-window" class="dark-parchment">
-                <ul id="game-log"></ul>
-            </div>
+            <div id="log-window" class="dark-parchment"><ul id="game-log"></ul></div>
 
-            <header id="hero-status" class="parchment" style="align-items: flex-start;">
+            <header id="hero-status" class="parchment">
                 <div class="status-box" style="flex-grow: 1;">
-                    <div style="display: flex; flex-direction: column; text-align: left; margin-bottom: 8px;">
-                        <h2 style="margin: 0; text-align: left; font-size: 1.3em;"><span id="hero-icon">🛡️</span> <span id="hero-name-display">Herói</span></h2>
-                        <div style="font-size: 0.85em; color: #5d4037; font-weight: bold; margin-top: 4px;">
-                            <span id="hero-class-name">Classe</span> - <span class="lvl-badge"><span id="txt-lvl">Nvl</span> <span id="lvl">1</span></span>
-                        </div>
+                    <h2 style="text-align: left; margin: 0;"><span id="hero-icon">🛡️</span> <span id="hero-name-display">Herói</span></h2>
+                    <div style="font-size: 0.8em; font-weight: bold; margin-bottom: 5px;">
+                        <span id="hero-class-name">Classe</span> - <span class="lvl-badge">Nvl <span id="lvl">1</span></span>
                     </div>
-                    
                     <div class="bars">
-                        <div class="stat-row"><span id="txt-hp">❤️ Vida:</span><div class="bar-container hp-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div></div>
-                        <div class="stat-row"><span id="txt-mp">🔵 Mana:</span><div class="bar-container mp-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div></div>
-                        
-                        <div class="stat-row" style="margin-top: 5px; font-size: 0.80em; display: flex; flex-wrap: wrap; gap: 4px;">
-                            <span style="color: #ffca28; text-shadow: 1px 1px 1px #000; width: 45%;">⚔️ Atk: <span id="atk-val">0</span></span> 
-                            <span style="color: #4fc3f7; text-shadow: 1px 1px 1px #000; width: 45%;">🛡️ Def: <span id="def-val">0</span></span>
-                            <span style="color: #ef5350; text-shadow: 1px 1px 1px #000; width: 45%;">💪 For: <span id="str-val">0</span></span>
-                            <span style="color: #66bb6a; text-shadow: 1px 1px 1px #000; width: 45%;">🏃 Vel: <span id="spd-val">0</span></span>
-                            <span style="color: #ab47bc; text-shadow: 1px 1px 1px #000; width: 45%;">🎯 Des: <span id="dex-val">0</span></span>
-                            <span style="color: #ffa726; text-shadow: 1px 1px 1px #000; width: 45%;">🗣️ Car: <span id="cha-val">0</span></span>
+                        <div class="stat-row">❤️ <div class="bar-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div></div>
+                        <div class="stat-row">🔵 <div class="bar-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div></div>
+                        <div class="stat-row" style="font-size: 0.75em; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 5px;">
+                            <span>⚔️ Atk: <span id="atk-val">0</span></span> <span>🛡️ Def: <span id="def-val">0</span></span>
+                            <span>💪 For: <span id="str-val">0</span></span> <span>🏃 Vel: <span id="spd-val">0</span></span>
+                            <span>🎯 Des: <span id="dex-val">0</span></span> <span>🗣️ Car: <span id="cha-val">0</span></span>
                         </div>
-                        
-                        <div class="stat-row" style="margin-top:4px;"><span>🌟 EXP:</span><div class="bar-container xp-container"><div id="xp-bar" class="bar xp"></div></div></div>
                     </div>
                 </div>
-
-                <div class="inventory-btn" onclick="window.ui.openInventory()" style="margin-left: 10px;">
-                    <h3 id="txt-bag">🎒 Bolsa</h3>
-                    <div class="inv-summary">
-                        <p>💰 <b id="gold">0</b></p>
-                        <p>🧪 <b id="potions">3</b></p>
-                    </div>
-                    <p class="click-hint" id="txt-open-bag">(Toque)</p>
+                <div class="inventory-btn" onclick="window.ui.openInventory()">
+                    <h3>🎒 Bolsa</h3>
+                    <p>💰 <b id="gold">0</b></p>
+                    <p>🧪 <b id="potions">3</b></p>
                 </div>
             </header>
 
-            <main style="flex-grow: 1; display:flex; flex-direction:column; justify-content:center;">
-                <div id="battle-arena" class="hidden stone-bg">
-                    <div class="vs-container">
-                        <div class="combatant" id="player-portrait"><div class="portrait-frame gold-frame"><div class="portrait hero-art" id="player-art-icon">🤺</div></div><span class="label" id="txt-you">Você</span></div>
-                        <div class="vs-text">⚔️</div>
-                        <div class="combatant" id="enemy-portrait"><div class="portrait-frame iron-frame"><div class="portrait enemy-art" id="enemy-art-icon">👺</div></div><span class="label enemy-label" id="enemy-name-display">Monstro</span></div>
-                    </div>
-                    <div id="enemy-hud"><div class="bar-container enemy-hp-container"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div></div>
+            <div id="battle-arena" class="hidden stone-bg">
+                <div class="vs-container">
+                    <div class="combatant" id="player-portrait"><div class="portrait-frame gold-frame" id="player-art-icon">🤺</div></div>
+                    <div class="vs-text">⚔️</div>
+                    <div class="combatant" id="enemy-portrait"><div class="portrait-frame iron-frame" id="enemy-art-icon">👺</div><span class="label enemy-label" id="enemy-name-display">Inimigo</span></div>
                 </div>
-            </main>
+                <div class="bar-container enemy-hp-container"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div>
+            </div>
 
             <div id="controls">
                 <div id="exploration-actions">
-                    <button class="btn-medieval" id="btn-explore" onclick="window.game.explore()">🌲 Explorar</button>
-                    <button class="btn-medieval" id="btn-rest" onclick="window.game.rest()">🛌 Pousada (10💰)</button>
-                    <button class="btn-medieval purchase" id="btn-buy-potion" onclick="window.player.buyPotion()">🛒 Comprar Poção (20💰)</button>
+                    <button class="btn-medieval" onclick="window.game.explore()">🌲 Explorar</button>
+                    <button class="btn-medieval" onclick="window.game.rest()">🛌 Pousada (10💰)</button>
+                    <button class="btn-medieval purchase" onclick="window.player.buyPotion()">🛒 Comprar Poção (20💰)</button>
                 </div>
-                
                 <div id="combat-actions" class="hidden">
-                    <button class="btn-medieval attack" id="btn-attack" onclick="window.combat.attack()">⚔️ Atacar!</button>
-                    <button class="btn-medieval skill" id="btn-skill" onclick="window.combat.useSkill()">✨ <span id="skill-name">Poder</span></button>
-                    <button class="btn-medieval heal" id="btn-use-potion" onclick="window.player.usePotion()">🧪 Poção</button>
-                    <button class="btn-medieval flee" id="btn-flee" onclick="window.combat.flee()">🏃 Fugir</button>
+                    <button class="btn-medieval attack" onclick="window.combat.attack()">⚔️ Atacar!</button>
+                    <button class="btn-medieval skill" onclick="window.combat.useSkill()">✨ <span id="skill-name">Poder</span></button>
+                    <button class="btn-medieval heal" onclick="window.player.usePotion()">🧪 Poção</button>
+                    <button class="btn-medieval flee" onclick="window.combat.flee()">🏃 Fugir</button>
                 </div>
             </div>
         </div>
@@ -125,49 +97,31 @@
 
     <div id="inventory-modal" class="modal-overlay hidden">
         <div class="parchment inventory-panel">
-            <h2 id="txt-inv-title">🎒 Equipamentos</h2>
+            <h2>🎒 Inventário</h2>
             <div class="inventory-sections">
-                <div class="inv-category"><h3 id="txt-equipped">🤺 Corpo</h3><ul id="inv-equipped"></ul></div>
-                <div class="inv-category" style="margin-top: 15px;"><h3 id="txt-bag-items">📦 Mochila</h3><ul id="inv-bag"></ul></div>
+                <div class="inv-category"><h3>🤺 Equipado</h3><ul id="inv-equipped"></ul></div>
+                <div class="inv-category" style="margin-top: 10px;"><h3>📦 Mochila</h3><ul id="inv-bag"></ul></div>
             </div>
-            <button class="close-btn btn-medieval" onclick="window.ui.closeInventory()">❌ Retornar</button>
+            <button class="close-btn btn-medieval" onclick="window.ui.closeInventory()">❌ Voltar</button>
+        </div>
+    </div>
+
+    <div id="event-modal" class="modal-overlay hidden">
+        <div class="parchment inventory-panel" style="text-align: center;">
+            <h2 id="event-title" style="color: #b71c1c;">📜 História</h2>
+            <p id="event-desc" style="margin: 20px 0; font-weight: bold;"></p>
+            <div id="event-choices" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
     </div>
 
     <div id="settings-modal" class="modal-overlay hidden">
         <div class="parchment inventory-panel" style="text-align: center;">
-            <h2 id="txt-settings-title">⚙️ Sistema</h2>
-            
-            <div style="margin: 15px 0;">
-                <h3 id="txt-lang" style="font-size: 0.9em; margin-bottom: 10px; color: #4e342e;">Idioma / Language</h3>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-sys" style="flex:1;" onclick="window.sys.setLang('pt')">🇧🇷 PT-BR</button>
-                    <button class="btn-sys" style="flex:1;" onclick="window.sys.setLang('en')">🇺🇸 EN</button>
-                </div>
-            </div>
-
-            <div style="margin: 15px 0; border-top: 1px dashed rgba(139, 107, 74, 0.5); padding-top: 15px;">
-                <h3 style="font-size: 0.9em; margin-bottom: 10px; color: #4e342e;">Nuvem / Cloud</h3>
-                <div id="g_id_onload" data-client_id="SEU_CLIENT_ID_AQUI.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
-                <div class="g_id_signin" data-type="standard" data-theme="filled_black" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="center" style="display:flex; justify-content:center;"></div>
-                <p style="font-size: 0.75em; color: #555; margin-top: 5px;" id="txt-cloud-info">Faça login para salvar na nuvem.</p>
-            </div>
-
-            <div style="margin-top: 25px; display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-medieval" style="background: linear-gradient(#1b5e20, #004d40);" id="btn-manual-save" onclick="window.sys.exitSave()">💾 <span id="txt-save">Salvar Local e Sair</span></button>
-                <button class="btn-medieval" style="background: linear-gradient(#b71c1c, #7f0000); border-color:#ff5252;" id="btn-manual-reset" onclick="window.game.resetGame()">⚠️ <span id="txt-reset">Apagar Progresso</span></button>
-            </div>
-            
-            <button class="close-btn btn-medieval" style="margin-top: 25px;" id="txt-close-settings" onclick="window.ui.closeSettings()">Voltar ao Jogo</button>
-        </div>
-    </div>
-
-    <div id="event-modal" class="modal-overlay hidden">
-        <div class="parchment inventory-panel" style="text-align: center; padding: 25px;">
-            <h2 id="event-title" style="color: #b71c1c; font-size: 1.5em; margin-bottom: 15px; text-shadow: none;">📜 Evento</h2>
-            <p id="event-desc" style="font-size: 1.05em; line-height: 1.5; margin-bottom: 25px; color: #3e2723; font-weight: bold;"></p>
-            <div id="event-choices" style="display: flex; flex-direction: column; gap: 12px;">
-                </div>
+            <h2>⚙️ Sistema</h2>
+            <div id="g_id_onload" data-client_id="SEU_ID.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
+            <div class="g_id_signin" data-type="standard"></div>
+            <button class="btn-medieval" style="margin-top: 20px; background: #1b5e20;" onclick="window.sys.exitSave()">💾 Salvar e Sair</button>
+            <button class="btn-medieval" style="margin-top: 10px; background: #b71c1c;" onclick="window.game.resetGame()">⚠️ Apagar Save</button>
+            <button class="btn-medieval" style="margin-top: 20px;" onclick="window.ui.closeSettings()">Voltar</button>
         </div>
     </div>
 
