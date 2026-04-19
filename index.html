@@ -16,7 +16,7 @@
             <button class="btn-medieval top-btn" id="btn-settings" onclick="window.ui.openSettings()" title="Configurações do Sistema">⚙️</button>
         </div>
 
-        <div id="class-selection-screen">
+        <div id="class-selection-screen" class="screen-layout">
             <div class="title-glow">
                 <h1>🗡️ Aethelgard</h1>
             </div>
@@ -42,14 +42,32 @@
             </div>
         </div>
 
+        <div id="name-selection-screen" class="hidden screen-layout">
+            <div class="title-glow">
+                <h1>✍️ Seu Legado</h1>
+            </div>
+            <p style="text-align: center; margin-bottom: 20px;">Como o herói será chamado?</p>
+            <div style="text-align: center; padding: 0 20px;">
+                <input type="text" id="input-hero-name" placeholder="Digite seu nome..." maxlength="12" class="medieval-input" autocomplete="off">
+                <button class="btn-medieval" style="margin-top: 20px;" onclick="window.game.confirmName()">Avançar para a Batalha</button>
+                <button class="btn-medieval" style="margin-top: 10px; background: #3e2723; border-color: #1a0f0d;" onclick="window.game.cancelName()">Voltar</button>
+            </div>
+        </div>
+
         <div id="main-game-screen" class="hidden">
             <div id="log-window" class="dark-parchment">
                 <ul id="game-log"></ul>
             </div>
 
-            <header id="hero-status" class="parchment">
-                <div class="status-box">
-                    <h2 id="hero-title"><span id="hero-icon">🛡️</span> <span id="hero-class-name">Herói</span> <span class="lvl-badge"><span id="txt-lvl">Nvl</span> <span id="lvl">1</span></span></h2>
+            <header id="hero-status" class="parchment" style="align-items: flex-start;">
+                <div class="status-box" style="flex-grow: 1;">
+                    <div style="display: flex; flex-direction: column; text-align: left; margin-bottom: 8px;">
+                        <h2 style="margin: 0; text-align: left; font-size: 1.3em;"><span id="hero-icon">🛡️</span> <span id="hero-name-display">Herói</span></h2>
+                        <div style="font-size: 0.85em; color: #5d4037; font-weight: bold; margin-top: 4px;">
+                            <span id="hero-class-name">Classe</span> - <span class="lvl-badge"><span id="txt-lvl">Nvl</span> <span id="lvl">1</span></span>
+                        </div>
+                    </div>
+                    
                     <div class="bars">
                         <div class="stat-row"><span id="txt-hp">❤️ Vida:</span><div class="bar-container hp-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div></div>
                         <div class="stat-row"><span id="txt-mp">🔵 Mana:</span><div class="bar-container mp-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div></div>
@@ -61,13 +79,13 @@
                     </div>
                 </div>
 
-                <div class="inventory-btn" onclick="window.ui.openInventory()">
+                <div class="inventory-btn" onclick="window.ui.openInventory()" style="margin-left: 10px;">
                     <h3 id="txt-bag">🎒 Bolsa</h3>
                     <div class="inv-summary">
                         <p>💰 <b id="gold">0</b></p>
                         <p>🧪 <b id="potions">3</b></p>
                     </div>
-                    <p class="click-hint" id="txt-open-bag">(Toque para abrir)</p>
+                    <p class="click-hint" id="txt-open-bag">(Toque)</p>
                 </div>
             </header>
 
