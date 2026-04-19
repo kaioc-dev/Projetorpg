@@ -1,18 +1,21 @@
 // ==========================================
-// SISTEMA DE ÁUDIO
+// SISTEMA DE ÁUDIO (Domínio Público Seguro)
 // ==========================================
 window.audio = {
     muted: false,
-    bgm: new Audio('https://freepd.com/music/Epic%20Boss%20Battle.mp3'), 
-    clickSfx: new Audio('https://actions.google.com/sounds/v1/weapons/sword_swing.ogg'),
-    attackSfx: new Audio('https://actions.google.com/sounds/v1/weapons/battle_axe_swing.ogg'),
+    bgm: new Audio('https://ia800408.us.archive.org/11/items/KevinMacLeod-EpicUnease/Epic%20Unease.mp3'), 
+    clickSfx: new Audio('https://ia803204.us.archive.org/16/items/click_202005/click.mp3'),
+    attackSfx: new Audio('https://ia802804.us.archive.org/24/items/sword-swing/Sword%20Swing.mp3'),
+    gruntSfx: new Audio('https://ia600204.us.archive.org/29/items/PainSoundEffect/Pain%20Sound%20Effect.mp3'),
     
     init() {
-        this.bgm.loop = true; this.bgm.volume = 0.3; this.clickSfx.volume = 0.8; this.attackSfx.volume = 1.0;
+        this.bgm.loop = true; this.bgm.volume = 0.3; 
+        this.clickSfx.volume = 0.7; this.attackSfx.volume = 1.0; this.gruntSfx.volume = 0.8;
     },
-    playBGM() { if(!this.muted) this.bgm.play().catch(()=>{}); },
+    playBGM() { if(!this.muted) { this.bgm.play().catch(()=>{}); } },
     playClick() { if(!this.muted) { this.clickSfx.currentTime = 0; this.clickSfx.play().catch(()=>{}); } },
     playAttack() { if(!this.muted) { this.attackSfx.currentTime = 0; this.attackSfx.play().catch(()=>{}); } },
+    playGrunt() { if(!this.muted) { this.gruntSfx.currentTime = 0; this.gruntSfx.play().catch(()=>{}); } },
     toggleMute() {
         this.muted = !this.muted;
         document.getElementById('btn-sound').innerText = this.muted ? '🔇' : '🔊';
@@ -32,25 +35,22 @@ const i18n = {
         attack: "⚔️ Atacar!", potion: "🧪 Poção", flee: "🏃 Fugir", bag: "🎒 Bolsa", gold: "Ouro", potions: "Poções",
         you: "Você", lvl: "Nvl", atk: "Atk", def: "Def", open_bag: "(Toque para abrir)",
         invTitle: "🎒 Equipamentos", equipped: "🤺 Corpo", bagItems: "📦 Mochila",
-        settings: "⚙️ Sistema", lang: "Idioma", saveGame: "💾 Salvar Progresso", resetGame: "⚠️ Apagar Save",
-        closeSet: "Voltar ao Jogo", unequip: "Tirar", equip: "Equipar", use: "Beber", empty: "Vazio",
-        msg_welcome: "A aventura em Aethelgard começa!", msg_rest: "🛌 Vida e Mana restaurados!", msg_no_gold: "❌ Ouro insuficiente.",
-        msg_run: "🏃 Escapou com sucesso!", msg_norun: "🏃 Fuga bloqueada!"
+        settings: "⚙️ Sistema", lang: "Idioma", saveGame: "💾 Salvar e Sair", resetGame: "⚠️ Apagar Save",
+        closeSet: "Voltar ao Jogo", unequip: "Tirar", equip: "Equipar", use: "Beber", empty: "Vazio"
     },
     en: {
         choose: "Choose your destiny:", explore: "🌲 Explore", rest: "🛌 Inn (10💰)", buy: "🛒 Buy Potion (20💰)",
         attack: "⚔️ Attack!", potion: "🧪 Potion", flee: "🏃 Flee", bag: "🎒 Bag", gold: "Gold", potions: "Potions",
         you: "You", lvl: "Lvl", atk: "Atk", def: "Def", open_bag: "(Tap to open)",
         invTitle: "🎒 Equipment", equipped: "🤺 Body", bagItems: "📦 Backpack",
-        settings: "⚙️ System", lang: "Language", saveGame: "💾 Save Progress", resetGame: "⚠️ Erase Save",
-        closeSet: "Back to Game", unequip: "Unequip", equip: "Equip", use: "Drink", empty: "Empty",
-        msg_welcome: "The adventure in Aethelgard begins!", msg_rest: "🛌 HP and MP restored!", msg_no_gold: "❌ Not enough gold.",
-        msg_run: "🏃 Fled successfully!", msg_norun: "🏃 Flee blocked!"
+        settings: "⚙️ System", lang: "Language", saveGame: "💾 Save & Exit", resetGame: "⚠️ Erase Save",
+        closeSet: "Back to Game", unequip: "Unequip", equip: "Equip", use: "Drink", empty: "Empty"
     }
 };
 
 window.sys = {
     setLang(l) {
+        window.audio.playClick();
         window.lang = l; const d = i18n[l];
         document.getElementById('txt-choose').innerText = d.choose;
         document.getElementById('btn-explore').innerText = d.explore;
@@ -75,13 +75,13 @@ window.sys = {
         document.getElementById('txt-save').innerText = d.saveGame;
         document.getElementById('txt-reset').innerText = d.resetGame;
         document.getElementById('txt-close-settings').innerText = d.closeSet;
-        window.audio.playClick();
         if(window.player && window.player.classObj) window.ui.updateInventoryModal();
-    }
+    },
+    exitSave() { window.audio.playClick(); window.game.saveGame(); location.reload(); }
 };
 
 // ==========================================
-// BANCO DE DADOS
+// DADOS DE JOGO E JOGADOR
 // ==========================================
 window.classesData = {
     cavaleiro: { name: "Cavaleiro", icon: "🛡️", hp: 120, mp: 20, atk: 10, def: 5, skillName: "Golpe Duplo", skillCost: 10, skillMult: 2.0 },
@@ -94,17 +94,14 @@ window.bossesDB = { 10: { name: "Rei Goblin", baseHp: 180, baseAtk: 25, baseXp: 
 window.lootTables = {
     weapons: [ { name: "Adaga", type: "weapon", stat: 2 }, { name: "Espada Longa", type: "weapon", stat: 5 }, { name: "Lâmina Épica", type: "weapon", stat: 15 } ],
     armors: [ { name: "Túnica", type: "armor", stat: 2 }, { name: "Cota de Malha", type: "armor", stat: 5 }, { name: "Placas Divinas", type: "armor", stat: 18 } ],
-    offhands: [ { name: "Broquel", type: "offhand", adds: "def", stat: 3 }, { name: "Grimório", type: "offhand", adds: "atk", stat: 4 }, { name: "Escudo Mestre", type: "offhand", adds: "def", stat: 10 } ]
+    offhands: [ { name: "Broquel", type: "offhand", adds: "def", stat: 3 }, { name: "Grimório", type: "offhand", adds: "atk", stat: 4 }, { name: "Escudo Divino", type: "offhand", adds: "def", stat: 10 } ]
 };
 window.npcs = [
     { name: "Curandeira", encounter: () => { window.player.heal(80); window.ui.log("🧙‍♀️ +80 HP.", "loot"); } },
     { name: "Sábio", encounter: () => { window.player.gainXp(50); window.ui.log("🧙‍♂️ +50 EXP.", "loot"); } },
-    { name: "Ladrão", encounter: () => { if(window.player.gold > 10) { window.player.gold -= 10; window.ui.log("🥷 -10 Ouro/Gold!", "dmg-taken"); } else window.ui.log("🥷 Evitou o roubo.", "sys"); } }
+    { name: "Ladrão", encounter: () => { if(window.player.gold > 10) { window.player.gold -= 10; window.ui.log("🥷 Furtou 10 Ouro/Gold!", "dmg-taken"); } else window.ui.log("🥷 Sem ouro para roubar.", "sys"); } }
 ];
 
-// ==========================================
-// JOGADOR
-// ==========================================
 window.player = {
     classObj: null, lvl: 1, xp: 0, xpToNext: 50, gold: 0, potions: 3, highestBossDefeated: 0,
     hp: 0, maxHp: 0, mp: 0, maxMp: 0, baseAtk: 0, baseDef: 0, atk: 0, def: 0, 
@@ -122,12 +119,12 @@ window.player = {
         window.audio.playClick(); let item = this.inventory[i];
         if (this.equipped[item.type]) this.inventory.push(this.equipped[item.type]);
         this.equipped[item.type] = item; this.inventory.splice(i, 1);
-        this.recalculateStats(); window.ui.updateInventoryModal(); window.game.saveGame(true);
+        this.recalculateStats(); window.ui.updateInventoryModal(); window.game.saveGame();
     },
 
     unequip(s) {
         window.audio.playClick();
-        if (this.equipped[s]) { this.inventory.push(this.equipped[s]); this.equipped[s] = null; this.recalculateStats(); window.ui.updateInventoryModal(); window.game.saveGame(true); }
+        if (this.equipped[s]) { this.inventory.push(this.equipped[s]); this.equipped[s] = null; this.recalculateStats(); window.ui.updateInventoryModal(); window.game.saveGame(); }
     },
 
     heal(v) { this.hp = Math.min(this.hp + v, this.maxHp); window.ui.update(); },
@@ -135,18 +132,18 @@ window.player = {
     
     usePotion() {
         window.audio.playClick();
-        if (this.potions <= 0) return window.ui.log(window.lang==='pt'?"❌ Sem poções!":"❌ No potions!", "dmg-taken");
+        if (this.potions <= 0) return window.ui.log("❌ Sem poções!", "dmg-taken");
         if (this.hp === this.maxHp && this.mp === this.maxMp) return;
         this.potions--; this.heal(60); this.restoreMp(40);
-        window.ui.log(`🧪 +60 HP / +40 MP.`, "loot"); window.ui.updateInventoryModal();
+        window.ui.log(`🧪 Curou/Healed.`, "loot"); window.ui.updateInventoryModal();
         if (window.game.state === 'combat') { document.getElementById('inventory-modal').classList.add('hidden'); setTimeout(() => window.combat.enemyTurn(), 800); } 
-        else window.game.saveGame(true);
+        else window.game.saveGame();
     },
 
     buyPotion() {
         window.audio.playClick();
-        if (this.gold >= 20) { this.gold -= 20; this.potions++; window.ui.log("🛒 +1 Poção/Potion.", "loot"); window.ui.update(); window.game.saveGame(true); } 
-        else window.ui.log(i18n[window.lang].msg_no_gold);
+        if (this.gold >= 20) { this.gold -= 20; this.potions++; window.ui.log("🛒 +1 Poção/Potion.", "loot"); window.ui.update(); window.game.saveGame(); } 
+        else window.ui.log("❌ Ouro insuficiente / Not enough gold.");
     },
 
     gainXp(v) {
@@ -155,50 +152,42 @@ window.player = {
         if (this.xp >= this.xpToNext) {
             this.lvl++; this.xp -= this.xpToNext; this.xpToNext = Math.floor(this.xpToNext * 1.5);
             this.maxHp += 15; this.hp = this.maxHp; this.maxMp += 5; this.mp = this.maxMp; this.baseAtk += 3; this.baseDef += 1; 
-            this.recalculateStats(); window.ui.log(`🎊 Lvl UP: ${this.lvl}!`, "loot");
+            this.recalculateStats(); window.ui.log(`🎊 NÍVEL UP / LEVEL UP: ${this.lvl}!`, "loot");
         }
     }
 };
 
-// ==========================================
-// EXPLORAÇÃO E SISTEMA
-// ==========================================
 window.game = {
     state: 'menu',
 
-    saveGame(hidden = false, fromMenu = false) {
+    saveGame() {
         if (!window.player.classObj) return; 
         localStorage.setItem('aethelgard_save', JSON.stringify(window.player));
-        if(!hidden) {
-            const btn = document.getElementById('btn-save');
-            btn.style.boxShadow = "0 0 15px #69f0ae"; btn.style.borderColor = "#69f0ae";
-            setTimeout(()=> { btn.style.boxShadow = ""; btn.style.borderColor = ""; }, 500);
-            window.audio.playClick();
-        }
-        if(fromMenu) { window.ui.log("💾 Jogo Salvo / Game Saved", "sys"); window.ui.closeSettings(); }
     },
 
     loadGame() {
-        const saved = localStorage.getItem('aethelgard_save');
-        if (saved) {
-            Object.assign(window.player, JSON.parse(saved));
-            document.getElementById('hero-icon').innerText = window.player.classObj.icon;
-            document.getElementById('player-art-icon').innerText = window.player.classObj.icon;
-            document.getElementById('hero-class-name').innerText = window.player.classObj.name;
-            document.getElementById('skill-name').innerText = window.player.classObj.skillName;
+        try {
+            const saved = localStorage.getItem('aethelgard_save');
+            if (saved) {
+                Object.assign(window.player, JSON.parse(saved));
+                document.getElementById('hero-icon').innerText = window.player.classObj.icon;
+                document.getElementById('player-art-icon').innerText = window.player.classObj.icon;
+                document.getElementById('hero-class-name').innerText = window.player.classObj.name;
+                document.getElementById('skill-name').innerText = window.player.classObj.skillName;
 
-            document.getElementById('class-selection-screen').classList.add('hidden');
-            document.getElementById('main-game-screen').classList.remove('hidden');
-            document.getElementById('top-menu').classList.remove('hidden');
-            
-            this.state = 'explore'; window.player.recalculateStats(); return true;
-        }
+                document.getElementById('class-selection-screen').classList.add('hidden');
+                document.getElementById('main-game-screen').classList.remove('hidden');
+                document.getElementById('top-menu').classList.remove('hidden');
+                
+                this.state = 'explore'; window.player.recalculateStats(); return true;
+            }
+        } catch(e) { localStorage.removeItem('aethelgard_save'); } // Se der erro, reseta
         return false;
     },
 
     resetGame() {
         window.audio.playClick();
-        if(confirm(window.lang==='pt'?"Apagar tudo de vez?":"Delete everything permanently?")) {
+        if(confirm(window.lang==='pt'?"Apagar todo seu progresso?":"Delete all progress?")) {
             localStorage.removeItem('aethelgard_save'); location.reload();
         }
     },
@@ -211,10 +200,12 @@ window.game = {
         
         document.getElementById('hero-icon').innerText = cls.icon; document.getElementById('player-art-icon').innerText = cls.icon;
         document.getElementById('hero-class-name').innerText = cls.name; document.getElementById('skill-name').innerText = cls.skillName;
-        document.getElementById('class-selection-screen').classList.add('hidden'); document.getElementById('main-game-screen').classList.remove('hidden');
+        
+        document.getElementById('class-selection-screen').classList.add('hidden'); 
+        document.getElementById('main-game-screen').classList.remove('hidden');
         document.getElementById('top-menu').classList.remove('hidden');
         
-        this.state = 'explore'; window.ui.log(i18n[window.lang].msg_welcome, "loot"); this.saveGame(true);
+        this.state = 'explore'; window.ui.log(window.lang==='pt'?"A aventura começa!":"The adventure begins!", "loot"); this.saveGame();
     },
 
     explore() {
@@ -229,7 +220,7 @@ window.game = {
         if (r < 0.45) window.combat.start(window.bestiary[Math.floor(Math.random()*window.bestiary.length)], false);
         else if (r < 0.70) { 
             const g = Math.floor(Math.random() * 20) + 5; window.player.gold += g;
-            window.ui.log(`🌲 +${g}💰.`, "loot"); window.ui.update(); this.saveGame(true);
+            window.ui.log(`🌲 Achou/Found ${g}💰.`, "loot"); window.ui.update(); this.saveGame();
         } else if (r < 0.85) { 
             const iRoll = Math.random(); let drop;
             if(iRoll < 0.33) drop = window.lootTables.weapons[Math.floor(Math.random() * window.lootTables.weapons.length)];
@@ -237,22 +228,19 @@ window.game = {
             else drop = window.lootTables.offhands[Math.floor(Math.random() * window.lootTables.offhands.length)];
             
             window.player.inventory.push(drop); window.ui.log(`🎁 Item: <b>${drop.name}</b>!`, "skill");
-            window.ui.update(); this.saveGame(true);
-        } else { window.npcs[Math.floor(Math.random() * window.npcs.length)].encounter(); window.ui.update(); this.saveGame(true); }
+            window.ui.update(); this.saveGame();
+        } else { window.npcs[Math.floor(Math.random() * window.npcs.length)].encounter(); window.ui.update(); this.saveGame(); }
     },
 
     rest() {
         window.audio.playClick();
         if (window.player.gold >= 10) {
             window.player.gold -= 10; window.player.hp = window.player.maxHp; window.player.mp = window.player.maxMp;
-            window.ui.log(i18n[window.lang].msg_rest, "loot"); window.ui.update(); this.saveGame(true);
-        } else { window.ui.log(i18n[window.lang].msg_no_gold); }
+            window.ui.log(window.lang==='pt'?"🛌 Descansou.":"🛌 Rested.", "loot"); window.ui.update(); this.saveGame();
+        } else { window.ui.log(window.lang==='pt'?"❌ Ouro insuficiente.":"❌ Not enough gold."); }
     }
 };
 
-// ==========================================
-// COMBATE
-// ==========================================
 window.combat = {
     enemy: null, isBossFight: 0, 
 
@@ -261,7 +249,7 @@ window.combat = {
         const scale = 1 + ((window.player.lvl - 1) * 0.20); 
         this.enemy = { name: e.name, hp: Math.floor(e.baseHp * scale), maxHp: Math.floor(e.baseHp * scale), atk: Math.floor(e.baseAtk * scale), xp: Math.floor(e.baseXp * scale), gold: Math.floor(e.baseGold * scale), icon: e.icon, lvl: isBoss ? bLvl : window.player.lvl };
         
-        document.getElementById('battle-arena').style.boxShadow = isBoss ? "inset 0 0 30px #b71c1c" : "inset 0 0 30px #000";
+        document.getElementById('battle-arena').style.boxShadow = isBoss ? "inset 0 0 30px #b71c1c, 0 5px 15px rgba(0,0,0,0.8)" : "inset 0 0 30px #000, 0 5px 15px rgba(0,0,0,0.8)";
         document.getElementById('battle-arena').style.borderColor = isBoss ? "#ff5252" : "#444";
         window.ui.log(`⚠️ <b>${this.enemy.name} (Nvl ${this.enemy.lvl})</b> ataca!`, "dmg-taken");
         window.ui.toggleMode(true); window.ui.update();
@@ -276,7 +264,7 @@ window.combat = {
 
     useSkill() {
         if (!this.enemy || this.enemy.hp <= 0) return;
-        if (window.player.mp < window.player.classObj.skillCost) return window.ui.log("❌ OOM", "dmg-taken");
+        if (window.player.mp < window.player.classObj.skillCost) return window.ui.log("❌ Sem Mana / OOM", "dmg-taken");
         
         window.player.mp -= window.player.classObj.skillCost; window.ui.update();
         window.audio.playAttack(); window.ui.animate('player-portrait', 'anim-attack');
@@ -296,7 +284,8 @@ window.combat = {
         window.ui.animate('enemy-portrait', 'anim-attack');
         const finalDamage = Math.max(1, (this.enemy.atk + Math.floor(Math.random() * 6)) - window.player.def); 
         window.player.hp -= finalDamage;
-        window.ui.log(`🩸 Inimigo: <b>${finalDamage}</b> dmg.`, "dmg-taken");
+        window.audio.playGrunt();
+        window.ui.log(`🩸 Inimigo ataca/Enemy hits: <b>${finalDamage}</b> (Aparou/Def ${window.player.def}🛡️).`, "dmg-taken");
         window.ui.animate('player-portrait', 'anim-shake'); window.ui.update();
         document.getElementById('combat-actions').style.pointerEvents = 'auto';
         if (window.player.hp <= 0) this.lose();
@@ -305,8 +294,8 @@ window.combat = {
     flee() {
         window.audio.playClick();
         if (this.isBossFight) return window.ui.log("❌ BOSS FIGHT!", "dmg-taken");
-        if (Math.random() > 0.4) { window.ui.log(i18n[window.lang].msg_run); this.end(); } 
-        else { window.ui.log(i18n[window.lang].msg_norun, "dmg-taken"); document.getElementById('combat-actions').style.pointerEvents = 'none'; setTimeout(() => this.enemyTurn(), 800); }
+        if (Math.random() > 0.4) { window.ui.log(window.lang==='pt'?"🏃 Escapou!":"🏃 Escaped!"); this.end(); } 
+        else { window.ui.log(window.lang==='pt'?"🏃 Falhou!":"🏃 Failed!", "dmg-taken"); document.getElementById('combat-actions').style.pointerEvents = 'none'; setTimeout(() => this.enemyTurn(), 800); }
     },
 
     win() {
@@ -317,7 +306,7 @@ window.combat = {
             window.ui.log(`👑 <b>CHEFÃO DERROTADO! / BOSS DEFEATED!</b>`, "skill");
             if (this.isBossFight === 50) { setTimeout(() => { alert("🎉 PARABÉNS! Você zerou o jogo! / You beat the game!"); location.reload(); }, 2000); return; }
         }
-        window.game.saveGame(true); this.end();
+        window.game.saveGame(); this.end();
     },
 
     lose() {
@@ -334,9 +323,6 @@ window.combat = {
     }
 };
 
-// ==========================================
-// GERENCIADOR UI E MODAIS
-// ==========================================
 window.ui = {
     log(m, cls = "") { const c = document.getElementById('log-window'); const u = document.getElementById('game-log'); const l = document.createElement('li'); l.innerHTML = `> ${m}`; if(cls) l.className = cls; u.appendChild(l); setTimeout(() => { c.scrollTop = c.scrollHeight; }, 10); },
     update() {
@@ -349,20 +335,18 @@ window.ui = {
         if (window.combat.enemy) { document.getElementById('enemy-name-display').innerText = window.combat.enemy.name; document.getElementById('enemy-art-icon').innerText = window.combat.enemy.icon; document.getElementById('enemy-hp-bar').style.width = `${Math.max(0, (window.combat.enemy.hp / window.combat.enemy.maxHp) * 100)}%`; }
     },
     updateInventoryModal() {
-        const d = i18n[window.lang];
-        let eqHTML = "";
+        const d = i18n[window.lang]; let eqHTML = "";
         
         if (window.player.equipped.weapon) eqHTML += `<li class="inv-item"><span>🗡️ ${window.player.equipped.weapon.name} <span style="color:#ffb300;">(+${window.player.equipped.weapon.stat} Atk)</span></span> <button class="inv-btn" onclick="window.player.unequip('weapon')">${d.unequip}</button></li>`; 
-        else eqHTML += `<li class="inv-item" style="color:#777;">🗡️ Arma/Weapon: (${d.empty})</li>`;
+        else eqHTML += `<li class="inv-item" style="color:#777;">🗡️ ${d.empty}</li>`;
         
         if (window.player.equipped.offhand) eqHTML += `<li class="inv-item"><span>🎒 ${window.player.equipped.offhand.name} <span style="color:${window.player.equipped.offhand.adds==='atk'?'#ffb300':'#90caf9'};">(+${window.player.equipped.offhand.stat} ${window.player.equipped.offhand.adds==='atk'?'Atk':'Def'})</span></span> <button class="inv-btn" onclick="window.player.unequip('offhand')">${d.unequip}</button></li>`; 
-        else eqHTML += `<li class="inv-item" style="color:#777;">🎒 Mão 2/Offhand: (${d.empty})</li>`;
+        else eqHTML += `<li class="inv-item" style="color:#777;">🎒 ${d.empty}</li>`;
         
         if (window.player.equipped.armor) eqHTML += `<li class="inv-item"><span>🛡️ ${window.player.equipped.armor.name} <span style="color:#90caf9;">(+${window.player.equipped.armor.stat} Def)</span></span> <button class="inv-btn" onclick="window.player.unequip('armor')">${d.unequip}</button></li>`; 
-        else eqHTML += `<li class="inv-item" style="color:#777;">🛡️ Armadura/Armor: (${d.empty})</li>`;
+        else eqHTML += `<li class="inv-item" style="color:#777;">🛡️ ${d.empty}</li>`;
         
         document.getElementById('inv-equipped').innerHTML = eqHTML;
-
         let bagHTML = `<li class="inv-item"><span>🧪 Poção/Potion (x${window.player.potions})</span> <button class="inv-btn" onclick="window.player.usePotion()">${d.use}</button></li>`;
         window.player.inventory.forEach((item, index) => {
             let icon = item.type === 'weapon' ? '🗡️' : (item.type === 'armor' ? '🛡️' : '🎒');
@@ -379,4 +363,4 @@ window.ui = {
     animate(id, cls) { const el = document.getElementById(id); if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 350); }
 };
 
-window.onload = () => { window.sys.setLang('pt'); if(window.game.loadGame()) document.getElementById('top-menu').classList.remove('hidden'); };
+window.onload = () => { window.sys.setLang('pt'); if(window.game.loadGame()) document.getElementById('top-menu').classList.remove('hidden'); else document.getElementById('class-selection-screen').classList.remove('hidden'); };
