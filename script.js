@@ -1,5 +1,5 @@
 // ==========================================
-// DADOS GERAIS (Classes, Inimigos, Itens)
+// DADOS GERAIS
 // ==========================================
 window.classesData = {
     cavaleiro: { name: "Cavaleiro", icon: "🛡️", hp: 120, mp: 20, atk: 10, def: 5, skillName: "Golpe Duplo", skillCost: 10, skillMult: 2.0 },
@@ -23,25 +23,30 @@ window.bossesDB = {
     50: { name: "Dragão Negro", baseHp: 1200, baseAtk: 130, baseXp: 0, baseGold: 5000, icon: "🐉" }
 };
 
+// Loot Atualizado com "Segunda Mão" (offhand)
 window.lootTables = {
     weapons: [
         { name: "Adaga Enferrujada", type: "weapon", stat: 2 },
         { name: "Espada Longa", type: "weapon", stat: 5 },
-        { name: "Machado Pesado", type: "weapon", stat: 9 },
         { name: "Lâmina Épica", type: "weapon", stat: 15 }
     ],
     armors: [
         { name: "Túnica de Trapos", type: "armor", stat: 2 },
         { name: "Cota de Malha", type: "armor", stat: 5 },
-        { name: "Armadura de Ferro", type: "armor", stat: 10 },
         { name: "Placas Divinas", type: "armor", stat: 18 }
+    ],
+    offhands: [
+        { name: "Broquel de Madeira", type: "offhand", adds: "def", stat: 3 },
+        { name: "Grimório Arcano", type: "offhand", adds: "atk", stat: 4 },
+        { name: "Escudo de Aço", type: "offhand", adds: "def", stat: 8 },
+        { name: "Adaga de Aparar", type: "offhand", adds: "atk", stat: 6 }
     ]
 };
 
 window.npcs = [
-    { name: "Curandeira Cega", encounter: () => { window.player.heal(80); window.ui.log("🧙‍♀️ 'Deixe-me curar suas feridas'. +80 Vida.", "loot"); } },
-    { name: "Mendigo Sábio", encounter: () => { window.player.gainXp(50); window.ui.log("🧙‍♂️ Ele sussurra segredos antigos. +50 EXP.", "loot"); } },
-    { name: "Ladrão Ágil", encounter: () => { if(window.player.gold > 10) { window.player.gold -= 10; window.ui.log("🥷 Furtou 10 de ouro de você!", "dmg-taken"); } else { window.ui.log("🥷 Um vulto o revista e desiste.", "loot"); } } }
+    { name: "Curandeira", encounter: () => { window.player.heal(80); window.ui.log("🧙‍♀️ +80 Vida.", "loot"); } },
+    { name: "Mendigo Sábio", encounter: () => { window.player.gainXp(50); window.ui.log("🧙‍♂️ +50 EXP.", "loot"); } },
+    { name: "Ladrão Ágil", encounter: () => { if(window.player.gold > 10) { window.player.gold -= 10; window.ui.log("🥷 Furtou 10 Ouro!", "dmg-taken"); } else { window.ui.log("🥷 Desistiu de roubar.", "loot"); } } }
 ];
 
 // ==========================================
@@ -55,25 +60,29 @@ window.player = {
     highestBossDefeated: 0,
     
     inventory: [], 
-    equipped: { weapon: null, armor: null },
+    equipped: { weapon: null, armor: null, offhand: null },
 
     recalculateStats() {
-        this.atk = this.baseAtk + (this.equipped.weapon ? this.equipped.weapon.stat : 0);
-        this.def = this.baseDef + (this.equipped.armor ? this.equipped.armor.stat : 0);
+        let offAtk = (this.equipped.offhand && this.equipped.offhand.adds === 'atk') ? this.equipped.offhand.stat : 0;
+        let offDef = (this.equipped.offhand && this.equipped.offhand.adds === 'def') ? this.equipped.offhand.stat : 0;
+
+        this.atk = this.baseAtk + (this.equipped.weapon ? this.equipped.weapon.stat : 0) + offAtk;
+        this.def = this.baseDef + (this.equipped.armor ? this.equipped.armor.stat : 0) + offDef;
         window.ui.update();
     },
 
     equip(index) {
         let item = this.inventory[index];
         if (this.equipped[item.type]) {
-            this.inventory.push(this.equipped[item.type]);
+            this.inventory.push(this.equipped[item.type]); // Devolve o antigo pra mochila
         }
         this.equipped[item.type] = item;
-        this.inventory.splice(index, 1);
+        this.inventory.splice(index, 1); // Remove o novo da mochila
         
         this.recalculateStats();
         window.ui.updateInventoryModal();
-        window.ui.log(`Você vestiu <b>${item.name}</b>.`, "skill");
+        window.ui.log(`Vestiu <b>${item.name}</b>.`, "skill");
+        window.game.saveGame(); // Salva automático ao equipar
     },
 
     unequip(slotType) {
@@ -82,6 +91,7 @@ window.player = {
             this.equipped[slotType] = null;
             this.recalculateStats();
             window.ui.updateInventoryModal();
+            window.game.saveGame();
         }
     },
 
@@ -90,21 +100,23 @@ window.player = {
     
     usePotion() {
         if (this.potions <= 0) return window.ui.log("❌ Sem poções!", "dmg-taken");
-        if (this.hp === this.maxHp && this.mp === this.maxMp) return window.ui.log("Vida e Mana já estão cheios.");
+        if (this.hp === this.maxHp && this.mp === this.maxMp) return window.ui.log("Vida/Mana já estão cheios.");
         this.potions--; 
         this.heal(60); 
         this.restoreMp(40);
-        window.ui.log(`🧪 Bebeu poção: +60 Vida, +40 Mana.`, "loot");
+        window.ui.log(`🧪 +60 Vida, +40 Mana.`, "loot");
         window.ui.updateInventoryModal();
         
         if (window.game.state === 'combat') {
             document.getElementById('inventory-modal').classList.add('hidden');
             setTimeout(() => window.combat.enemyTurn(), 800);
+        } else {
+            window.game.saveGame();
         }
     },
 
     buyPotion() {
-        if (this.gold >= 20) { this.gold -= 20; this.potions++; window.ui.log("🛒 Comprou 1 Poção.", "loot"); window.ui.update(); } 
+        if (this.gold >= 20) { this.gold -= 20; this.potions++; window.ui.log("🛒 Comprou 1 Poção.", "loot"); window.ui.update(); window.game.saveGame(); } 
         else { window.ui.log("❌ Ouro insuficiente."); }
     },
 
@@ -128,10 +140,58 @@ window.player = {
 };
 
 // ==========================================
-// EXPLORAÇÃO E EVENTOS
+// SISTEMA PRINCIPAL (Salvar e Explorar)
 // ==========================================
 window.game = {
     state: 'menu',
+
+    saveGame() {
+        if(!window.player.classObj) return; // Não salva no menu
+        const saveData = {
+            classObj: window.player.classObj,
+            hp: window.player.hp, maxHp: window.player.maxHp,
+            mp: window.player.mp, maxMp: window.player.maxMp,
+            baseAtk: window.player.baseAtk, baseDef: window.player.baseDef,
+            lvl: window.player.lvl, xp: window.player.xp, xpToNext: window.player.xpToNext,
+            gold: window.player.gold, potions: window.player.potions,
+            highestBossDefeated: window.player.highestBossDefeated,
+            inventory: window.player.inventory,
+            equipped: window.player.equipped
+        };
+        localStorage.setItem('aethelgard_save', JSON.stringify(saveData));
+        window.ui.log("💾 Jogo salvo com sucesso!", "sys");
+    },
+
+    loadGame() {
+        const saved = localStorage.getItem('aethelgard_save');
+        if (saved) {
+            const data = JSON.parse(saved);
+            Object.assign(window.player, data); // Copia os dados pro player
+            window.player.recalculateStats();
+            
+            // Atualiza Visuais
+            document.getElementById('hero-icon').innerText = data.classObj.icon;
+            document.getElementById('player-art-icon').innerText = data.classObj.icon;
+            document.getElementById('hero-class-name').innerText = data.classObj.name;
+            document.getElementById('skill-name').innerText = data.classObj.skillName;
+
+            document.getElementById('class-selection-screen').classList.add('hidden');
+            document.getElementById('main-game-screen').classList.remove('hidden');
+            
+            this.state = 'explore';
+            window.ui.log(`💾 Jogo Carregado! Bem-vindo de volta, <b>${data.classObj.name}</b>.`, "sys");
+            window.ui.update();
+            return true;
+        }
+        return false;
+    },
+
+    resetGame() {
+        if(confirm("Tem certeza que deseja apagar seu progresso? Isso não pode ser desfeito.")) {
+            localStorage.removeItem('aethelgard_save');
+            location.reload();
+        }
+    },
 
     chooseClass(classKey) {
         const cls = window.classesData[classKey];
@@ -152,6 +212,7 @@ window.game = {
         
         this.state = 'explore';
         window.ui.log(`Bem-vindo, <b>${cls.name}</b>. A aventura chama!`, "loot");
+        this.saveGame(); // Salva inicial
     },
 
     explore() {
@@ -173,24 +234,32 @@ window.game = {
             window.player.gold += foundGold;
             window.ui.log(`🌲 Achou um saco com ${foundGold}💰.`, "loot");
             window.ui.update();
+            this.saveGame(); // Auto-save
         } 
         else if (roll < 0.85) { 
-            if(Math.random() > 0.5) {
-                const w = window.lootTables.weapons[Math.floor(Math.random() * window.lootTables.weapons.length)];
-                window.player.inventory.push(w);
-                window.ui.log(`🎁 Achou uma arma: <b>${w.name}</b>!`, "skill");
+            // 33% Arma, 33% Armadura, 33% Segunda Mão
+            const itemRoll = Math.random();
+            let drop;
+            if(itemRoll < 0.33) {
+                drop = window.lootTables.weapons[Math.floor(Math.random() * window.lootTables.weapons.length)];
+                window.ui.log(`🎁 Achou arma: <b>${drop.name}</b>!`, "skill");
+            } else if(itemRoll < 0.66) {
+                drop = window.lootTables.armors[Math.floor(Math.random() * window.lootTables.armors.length)];
+                window.ui.log(`🛡️ Achou armadura: <b>${drop.name}</b>!`, "skill");
             } else {
-                const a = window.lootTables.armors[Math.floor(Math.random() * window.lootTables.armors.length)];
-                window.player.inventory.push(a);
-                window.ui.log(`🛡️ Achou armadura: <b>${a.name}</b>!`, "skill");
+                drop = window.lootTables.offhands[Math.floor(Math.random() * window.lootTables.offhands.length)];
+                window.ui.log(`🎒 Achou item de mão secundária: <b>${drop.name}</b>!`, "skill");
             }
+            window.player.inventory.push(drop);
             window.ui.update();
+            this.saveGame(); // Auto-save
         } 
         else { 
             const npc = window.npcs[Math.floor(Math.random() * window.npcs.length)];
-            window.ui.log(`⛺ Encontrou <b>${npc.name}</b>.`, "skill");
+            window.ui.log(`⛺ Encontrou <b>${npc.name}</b>.`, "sys");
             npc.encounter();
             window.ui.update();
+            this.saveGame(); // Auto-save
         }
     },
 
@@ -198,7 +267,8 @@ window.game = {
         if (window.player.gold >= 10) {
             if (window.player.hp === window.player.maxHp && window.player.mp === window.player.maxMp) return window.ui.log("Você já está descansado.");
             window.player.gold -= 10; window.player.hp = window.player.maxHp; window.player.mp = window.player.maxMp;
-            window.ui.log(`🛌 Descansou na pousada. Vida e Mana restaurados!`, "loot"); window.ui.update();
+            window.ui.log(`🛌 Descansou na pousada.`, "loot"); window.ui.update();
+            this.saveGame();
         } else { window.ui.log("❌ Ouro insuficiente (10💰)."); }
     }
 };
@@ -297,13 +367,15 @@ window.combat = {
                 return;
             }
         }
+        window.game.saveGame(); // Salva ao fim de toda batalha ganha
         this.end();
     },
 
     lose() {
-        window.ui.log(`💀 <b>A SUA LENDA ACABA AQUI...</b>`, "dmg-taken");
+        window.ui.log(`💀 <b>A SUA LENDA ACABA AQUI...</b> O save foi apagado.`, "dmg-taken");
         document.getElementById('combat-actions').style.display = 'none';
-        setTimeout(() => location.reload(), 4000);
+        localStorage.removeItem('aethelgard_save'); // Permadeath!
+        setTimeout(() => location.reload(), 5000);
     },
 
     end() { 
@@ -362,12 +434,21 @@ window.ui = {
         const bagList = document.getElementById('inv-bag');
         
         let eqHTML = "";
+        
+        // Slot Arma
         if (window.player.equipped.weapon) {
             eqHTML += `<li class="inv-item"><span>🗡️ ${window.player.equipped.weapon.name} (+${window.player.equipped.weapon.stat} Atk)</span> <button class="inv-btn" onclick="window.player.unequip('weapon')">Tirar</button></li>`;
         } else { eqHTML += `<li class="inv-item">🗡️ Arma: (Vazio)</li>`; }
         
+        // Slot Segunda Mão
+        if (window.player.equipped.offhand) {
+            let sType = window.player.equipped.offhand.adds === 'atk' ? 'Atk' : 'Def';
+            eqHTML += `<li class="inv-item"><span>🎒 ${window.player.equipped.offhand.name} (+${window.player.equipped.offhand.stat} ${sType})</span> <button class="inv-btn" onclick="window.player.unequip('offhand')">Tirar</button></li>`;
+        } else { eqHTML += `<li class="inv-item">🎒 Mão Secundária: (Vazio)</li>`; }
+
+        // Slot Armadura
         if (window.player.equipped.armor) {
-            eqHTML += `<li class="inv-item">🛡️ ${window.player.equipped.armor.name} (+${window.player.equipped.armor.stat} Def)</span> <button class="inv-btn" onclick="window.player.unequip('armor')">Tirar</button></li>`;
+            eqHTML += `<li class="inv-item"><span>🛡️ ${window.player.equipped.armor.name} (+${window.player.equipped.armor.stat} Def)</span> <button class="inv-btn" onclick="window.player.unequip('armor')">Tirar</button></li>`;
         } else { eqHTML += `<li class="inv-item">🛡️ Armadura: (Vazio)</li>`; }
         
         equipList.innerHTML = eqHTML;
@@ -379,8 +460,8 @@ window.ui = {
             bagHTML += "<li class='inv-item' style='text-align:center;'>Nenhum equipamento solto.</li>";
         } else {
             window.player.inventory.forEach((item, index) => {
-                let icon = item.type === 'weapon' ? '🗡️' : '🛡️';
-                let statType = item.type === 'weapon' ? 'Atk' : 'Def';
+                let icon = item.type === 'weapon' ? '🗡️' : (item.type === 'armor' ? '🛡️' : '🎒');
+                let statType = item.type === 'weapon' ? 'Atk' : (item.type === 'armor' ? 'Def' : (item.adds === 'atk' ? 'Atk' : 'Def'));
                 bagHTML += `<li class="inv-item"><span>${icon} ${item.name} (+${item.stat} ${statType})</span> <button class="inv-btn" onclick="window.player.equip(${index})">Equipar</button></li>`;
             });
         }
@@ -405,3 +486,8 @@ window.ui = {
         setTimeout(() => el.classList.remove(animationClass), 350);
     }
 };
+
+// Quando a página carregar, tenta buscar um Save!
+document.addEventListener("DOMContentLoaded", () => {
+    window.game.loadGame();
+});
