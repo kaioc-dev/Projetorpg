@@ -15,15 +15,30 @@ body {
     background-color: var(--bg-dungeon);
     background-image: radial-gradient(circle, #1a1a1a, #000);
     color: var(--text-light);
-    display: flex; justify-content: center; align-items: center;
-    min-height: 100vh; margin: 0; padding: 20px;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    min-height: 100vh; 
+    margin: 0; 
+    padding: 20px;
 }
 
 .wood-board {
-    width: 100%; max-width: 450px;
+    width: 100%; 
+    max-width: 450px;
+    
+    /* --- CORREÇÃO DO TAMANHO DA TELA --- */
+    height: 720px; /* Trava a altura do jogo */
+    display: flex;
+    flex-direction: column; /* Organiza os itens em coluna */
+    box-sizing: border-box;
+    /* ----------------------------------- */
+
     background-color: var(--wood-dark);
     background-image: repeating-linear-gradient(to right, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 10px);
-    padding: 20px; border-radius: 10px; position: relative;
+    padding: 20px; 
+    border-radius: 10px; 
+    position: relative;
     border: 6px solid #1a0d09;
     box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.8);
 }
@@ -37,9 +52,10 @@ body {
 h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color: var(--gold); margin: 0 0 10px 0; text-shadow: 2px 2px 4px #000; }
 h1 { font-size: 1.8em; }
 
-/* Novo Log Window com Auto-Scroll */
+/* Log Window com Auto-Scroll */
 .dark-parchment {
     height: 120px;
+    flex-shrink: 0; /* Impede que o log encolha */
     background: #1e1614;
     border: 2px solid #5d4037;
     border-radius: 5px;
@@ -57,6 +73,7 @@ h1 { font-size: 1.8em; }
 #game-log li.npc { color: #40c4ff; font-style: italic; }
 
 .parchment {
+    flex-shrink: 0; /* Impede que os status encolham */
     background-color: var(--parchment); color: var(--text-dark);
     padding: 15px; border: 2px solid #a68c53; border-radius: 5px;
     box-shadow: inset 0 0 20px rgba(139, 69, 19, 0.3), 3px 3px 8px rgba(0,0,0,0.6);
@@ -74,7 +91,14 @@ h1 { font-size: 1.8em; }
 .enemy-hp { background: #d32f2f; width: 100%; }
 .bar-text { position: absolute; width: 100%; text-align: center; font-size: 10px; color: white; top: 0; text-shadow: 1px 1px 0 #000; }
 
-.stone-bg { background: #1a1a1a; border: 3px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: inset 0 0 20px #000; }
+main {
+    flex-grow: 1; /* Faz a área principal ocupar o espaço restante */
+}
+
+.stone-bg { 
+    background: #1a1a1a; border: 3px solid #333; border-radius: 8px; 
+    padding: 15px; margin-bottom: 15px; box-shadow: inset 0 0 20px #000; 
+}
 .vs-container { display: flex; justify-content: space-around; align-items: center; margin-bottom: 15px; }
 .vs-text { font-size: 1.5em; opacity: 0.5; }
 .combatant { text-align: center; }
@@ -87,6 +111,11 @@ h1 { font-size: 1.8em; }
 
 .hidden { display: none !important; }
 
+/* Botões de Ação */
+#controls {
+    margin-top: auto; /* Empurra os controles sempre para o fundo da tela */
+}
+
 #exploration-actions, #combat-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .purchase, .flee { grid-column: span 2; }
 .btn-medieval { font-family: 'Cinzel Decorative', serif; font-weight: bold; font-size: 0.9em; color: #f5f5dc; background: linear-gradient(to bottom, #4e342e, #3e2723); border: 2px solid #5d4037; border-radius: 4px; padding: 10px; cursor: pointer; text-shadow: 1px 1px 2px #000; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
@@ -95,6 +124,7 @@ h1 { font-size: 1.8em; }
 .btn-medieval.attack { background: linear-gradient(to bottom, #b71c1c, #880e4f); border-color: #ff5252; }
 .btn-medieval.heal { background: linear-gradient(to bottom, #1b5e20, #004d40); border-color: #69f0ae; }
 
+/* Animações */
 .anim-attack { animation: strike 0.3s ease-in-out; }
 @keyframes strike { 0% { transform: scale(1); } 50% { transform: scale(1.2) translateY(-10px); } 100% { transform: scale(1); } }
 .anim-shake { animation: shake 0.3s; border-color: red !important; }
