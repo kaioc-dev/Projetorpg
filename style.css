@@ -17,7 +17,14 @@ body { background-color: var(--bg-dungeon); color: var(--text-light); display: f
     position: relative; box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
 }
 
-#top-menu { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 50; }
+#top-menu { 
+    position: absolute; 
+    bottom: 15px; /* Movido para a parte de baixo */
+    right: 15px; 
+    display: flex; 
+    gap: 10px; 
+    z-index: 50; 
+}
 
 .top-btn { 
     width: 45px; height: 45px; padding: 0; display: flex; justify-content: center; align-items: center; 
@@ -34,7 +41,12 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 .class-card:active { transform: scale(0.95); }
 .class-card h2 { margin: 0; color: #3e2723; text-shadow: none; font-weight: 900;}
 
-#main-game-screen { display: flex; flex-direction: column; height: 100%; padding-top: 45px; }
+#main-game-screen { 
+    display: flex; 
+    flex-direction: column; 
+    height: 100%; 
+    padding-top: 10px; /* Antes era 45px */
+}
 
 .dark-parchment { 
     height: 120px; flex-shrink: 0; 
@@ -76,7 +88,11 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 .label { display: block; margin-top: 5px; font-size: 0.85em; color: #ddd; text-align: center; font-weight: bold; text-shadow: 1px 1px 2px #000;}
 .enemy-label { color: #ff8a80; }
 
-#controls { margin-top: auto; padding-bottom: 10px; }
+#controls { 
+    margin-top: auto; 
+    padding-bottom: 65px; /* Dá espaço para o botão flutuar abaixo dos controles */
+}
+
 #exploration-actions, #combat-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px;}
 .purchase { grid-column: span 2; }
 
