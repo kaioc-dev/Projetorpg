@@ -7,7 +7,6 @@ function handleCredentialResponse(response) {
 window.audio = {
     bgm: new Audio('bgm.mp3'), clickSfx: new Audio('click.mp3'),
     attackSfx: new Audio('attack.mp3'), gruntSfx: new Audio('grunt.mp3'), bgmStarted: false,
-    
     init() { this.bgm.loop = true; this.bgm.volume = 0.3; this.clickSfx.volume = 0.7; this.attackSfx.volume = 1.0; this.gruntSfx.volume = 0.8; },
     startBGM() { if (!this.bgmStarted) { let p = this.bgm.play(); if (p !== undefined) { p.then(() => { this.bgmStarted = true; }).catch(e => {}); } } },
     playClick() { this.clickSfx.currentTime = 0; this.clickSfx.play().catch(()=>{}); },
@@ -59,8 +58,8 @@ window.classesData = {
     arqueiro: { name: "Arqueiro", icon: "🏹", hp: 90, mp: 30, atk: 14, def: 3, str: 4, dex: 9, spd: 8, cha: 4, skillName: "Tiro Preciso", skillCost: 15, skillMult: 2.5 },
     anao: { name: "Anão", icon: "🪓", hp: 160, mp: 15, atk: 9, def: 8, str: 10, dex: 3, spd: 2, cha: 3, skillName: "Fúria", skillCost: 15, skillMult: 1.8 }
 };
-window.bestiary = [ { name: "Goblin", baseHp: 30, baseAtk: 8, baseXp: 25, baseGold: 10, icon: "👺" }, { name: "Lobo", baseHp: 45, baseAtk: 12, baseXp: 40, baseGold: 15, icon: "🐺" }, { name: "Orc", baseHp: 80, baseAtk: 18, baseXp: 70, baseGold: 35, icon: "👹" }, { name: "Esqueleto", baseHp: 60, baseAtk: 15, baseXp: 55, baseGold: 20, icon: "💀" } ];
-window.bossesDB = { 10: { name: "Rei Goblin", baseHp: 180, baseAtk: 25, baseXp: 300, baseGold: 100, icon: "👑" }, 20: { name: "Lobo Alfa", baseHp: 250, baseAtk: 40, baseXp: 800, baseGold: 250, icon: "🐺" }, 30: { name: "General Orc", baseHp: 400, baseAtk: 60, baseXp: 2000, baseGold: 500, icon: "🪓" }, 40: { name: "Lich Ancião", baseHp: 600, baseAtk: 85, baseXp: 5000, baseGold: 1000, icon: "💀" }, 50: { name: "Dragão Negro", baseHp: 1200, baseAtk: 130, baseXp: 10000, baseGold: 5000, icon: "🐉" }, 100: { name: "Titã Esquecido", baseHp: 5000, baseAtk: 300, baseXp: 50000, baseGold: 20000, icon: "🗿" }, 150: { name: "Deus da Ruína", baseHp: 15000, baseAtk: 800, baseXp: 0, baseGold: 100000, icon: "👁️" }};
+window.bestiary = [ { name: "Goblin", baseHp: 30, baseAtk: 8, baseXp: 25, baseGold: 10, icon: "👺" }, { name: "Lobo", baseHp: 45, baseAtk: 12, baseXp: 40, baseGold: 15, icon: "🐺" }, { name: "Orc", baseHp: 80, baseAtk: 18, baseXp: 70, baseGold: 35, icon: "👹" }, { name: "Cultista", baseHp: 60, baseAtk: 15, baseXp: 55, baseGold: 20, icon: "🦹" } ];
+window.bossesDB = { 10: { name: "Rei Goblin", baseHp: 180, baseAtk: 25, baseXp: 300, baseGold: 100, icon: "👑" }, 20: { name: "Lobo Alfa", baseHp: 250, baseAtk: 40, baseXp: 800, baseGold: 250, icon: "🐺" }, 30: { name: "General Orc", baseHp: 400, baseAtk: 60, baseXp: 2000, baseGold: 500, icon: "🪓" }, 40: { name: "Sumo Sacerdote", baseHp: 600, baseAtk: 85, baseXp: 5000, baseGold: 1000, icon: "👁️" }, 50: { name: "Dragão Negro", baseHp: 1200, baseAtk: 130, baseXp: 10000, baseGold: 5000, icon: "🐉" }, 100: { name: "Titã Esquecido", baseHp: 5000, baseAtk: 300, baseXp: 50000, baseGold: 20000, icon: "🗿" }, 150: { name: "Deus da Ruína", baseHp: 15000, baseAtk: 800, baseXp: 0, baseGold: 100000, icon: "🌌" }};
 window.lootTables = {
     weapons: [ { name: "Adaga", type: "weapon", stat: 2 }, { name: "Espada Longa", type: "weapon", stat: 5 }, { name: "Lâmina Épica", type: "weapon", stat: 15 } ],
     armors: [ { name: "Túnica", type: "armor", stat: 2 }, { name: "Cota de Malha", type: "armor", stat: 5 }, { name: "Placas Divinas", type: "armor", stat: 18 } ],
@@ -68,147 +67,89 @@ window.lootTables = {
 };
 
 // -----------------------------------------------------
-// NOVO SISTEMA DE EVENTOS DE HISTÓRIA
+// HISTÓRIA DINÂMICA
 // -----------------------------------------------------
 window.events = [
     {
-        title: "🥷 O Ladrão de Estradas",
-        desc: "Um bandido encapuzado salta de uma árvore empunhando uma adaga enferrujada. 'A bolsa ou a vida, viajante!', ele rosna, estendendo a mão.",
+        title: "🥷 O Espião Sombrio",
+        desc: "Um homem encapuzado te observa das sombras. Ele ostenta o símbolo do Deus da Ruína no peito. 'Desista de procurar a Princesa Seraphina', ele avisa.",
         choices: [
             {
-                text: "💪 Intimidar (Exige Força ou Carisma)",
+                text: "💪 Interrogar à força (Força ou Carisma)",
                 action: () => {
                     if (window.player.str >= 10 || window.player.cha >= 12) {
-                        window.ui.log("🗣️ Você ergueu sua arma e o encarou. O bandido se assustou e fugiu derrubando 15💰!", "loot");
-                        window.player.gold += 15;
-                    } else {
-                        window.ui.log("🩸 Ele riu da sua tentativa e te esfaqueou antes de fugir!", "dmg-taken");
-                        window.player.hp = Math.max(1, window.player.hp - 15);
-                    }
-                }
-            },
-            {
-                text: "💨 Fugir Rapidamente (Exige Velocidade)",
-                action: () => {
-                    if (window.player.spd >= 8) {
-                        window.ui.log("💨 Você foi mais rápido e o deixou comendo poeira!", "skill");
-                    } else {
-                        window.ui.log("🥷 Você tropeçou. Ele te alcançou e roubou 10💰!", "dmg-taken");
-                        window.player.gold = Math.max(0, window.player.gold - 10);
-                    }
-                }
-            },
-            {
-                text: "💰 Entregar 5 Ouro",
-                action: () => {
-                    if (window.player.gold >= 5) {
-                        window.player.gold -= 5;
-                        window.ui.log("💰 Você pagou o pedágio e ele te deixou em paz.", "sys");
-                    } else {
-                        window.ui.log("🩸 Você não tinha ouro! Ele ficou furioso e te atacou!", "dmg-taken");
-                        window.player.hp = Math.max(1, window.player.hp - 10);
-                    }
-                }
-            }
-        ]
-    },
-    {
-        title: "📦 O Baú Trancado",
-        desc: "Você encontra um baú de madeira robusto escondido sob algumas folhas grossas. Ele possui uma fechadura complexa.",
-        choices: [
-            {
-                text: "🎯 Destrancar com cuidado (Exige Destreza)",
-                action: () => {
-                    if (window.player.dex >= 10) {
-                        window.ui.log("🔓 Clique! O baú abriu. Você encontrou 25💰 e 1 Poção!", "loot");
-                        window.player.gold += 25; window.player.potions++;
-                    } else {
-                        window.ui.log("💥 Uma agulha envenenada espetou seu dedo! A fechadura travou.", "dmg-taken");
-                        window.player.hp = Math.max(1, window.player.hp - 12);
-                    }
-                }
-            },
-            {
-                text: "🪓 Quebrar a tampa (Exige Força)",
-                action: () => {
-                    if (window.player.str >= 15) {
-                        window.ui.log("💥 CRASH! A madeira cedeu. Você pegou 20💰!", "loot");
+                        window.ui.log("🗣️ O espião treme de medo. Ele revela que a Princesa foi levada além do covil do Dragão Negro antes de fugir, deixando 20💰!", "loot");
                         window.player.gold += 20;
                     } else {
-                        window.ui.log("🔨 Sua arma bateu e ricocheteou. O baú está intacto, mas seus braços doem.", "sys");
+                        window.ui.log("🩸 Ele ri, te atinge com uma adaga envenenada e foge nas sombras!", "dmg-taken");
+                        window.player.hp = Math.max(1, window.player.hp - 20);
                     }
                 }
             },
             {
-                text: "🚶 Ignorar",
-                action: () => { window.ui.log("🚶 Melhor não arriscar armadilhas.", "sys"); }
+                text: "💨 Atacar rapidamente (Exige Velocidade)",
+                action: () => {
+                    if (window.player.spd >= 8) {
+                        window.ui.log("💨 Você o desarma! Ele deixa cair um Mapa Antigo (+EXP) antes de sumir.", "skill");
+                        window.player.gainXp(150);
+                    } else {
+                        window.ui.log("🥷 Ele foi mais rápido. Jogou areia nos seus olhos e sumiu.", "sys");
+                    }
+                }
             }
         ]
     },
     {
-        title: "🧙‍♀️ A Curandeira Ferida",
-        desc: "Uma velha senhora está caída no chão da floresta com um ferimento na perna. Ela pede ajuda com voz fraca.",
+        title: "⛺ O Acampamento Destruído",
+        desc: "Você encontra os destroços da Guarda Real de Aethelgard. Foi aqui que a emboscada aconteceu. Um soldado agoniza no chão.",
         choices: [
             {
-                text: "🧪 Dar uma Poção a ela",
+                text: "🧪 Dar uma Poção para salvá-lo",
                 action: () => {
                     if (window.player.potions > 0) {
                         window.player.potions--;
-                        window.ui.log("✨ A velha revelou ser um espírito da floresta! Você ganhou EXP e Defesa permanente!", "skill");
-                        window.player.gainXp(100);
-                        window.player.baseDef += 1;
-                        window.player.recalculateStats();
-                    } else {
-                        window.ui.log("❌ Você não tem poções para ajudá-la...", "sys");
-                    }
+                        window.ui.log("✨ O soldado sobrevive! Agradecido, ele te ensina uma técnica da guarda: Defesa permanente aumentada!", "skill");
+                        window.player.baseDef += 1; window.player.recalculateStats();
+                    } else { window.ui.log("❌ Você não tem poções. O soldado deu seu último suspiro.", "dmg-taken"); }
                 }
             },
             {
-                text: "🗣️ Ajudar com primeiros socorros (Exige Carisma)",
+                text: "🔍 Procurar pistas (Exige Destreza)",
                 action: () => {
-                    if (window.player.cha >= 8) {
-                        window.ui.log("🌿 Ela agradeceu sua gentileza e conjurou uma magia de cura em você!", "loot");
-                        window.player.heal(window.player.maxHp);
-                        window.player.restoreMp(window.player.maxMp);
+                    if (window.player.dex >= 10) {
+                        window.ui.log("🔓 Perto da carroça, você achou a presilha de cabelo da princesa de ouro maciço! (Vendida por 50💰)", "loot");
+                        window.player.gold += 50;
                     } else {
-                        window.ui.log("🚶 Você tentou ajudar, mas ela recusou por desconfiança.", "sys");
+                        window.ui.log("💥 Ao mexer nos destroços, uma armadilha deixada pelos cultistas explodiu!", "dmg-taken");
+                        window.player.hp = Math.max(1, window.player.hp - 15);
                     }
                 }
             }
         ]
     },
     {
-        title: "🏺 O Altar Sombrio",
-        desc: "No centro de uma clareira escura, um altar de pedra obsidiana pulsa com uma energia sinistra. Inscrições exigem um sacrifício de sangue.",
+        title: "🙏 O Altar da Deusa da Luz",
+        desc: "Em contraste com as trevas recentes, uma estátua da antiga deusa da luz brilha suavemente, oferecendo um refúgio da influência do Deus da Ruína.",
         choices: [
             {
-                text: "🩸 Cortar a mão (-20 HP, Ganha Atk Permanente)",
+                text: "🗣️ Orar pela segurança da Princesa (Exige Carisma)",
                 action: () => {
-                    if (window.player.hp > 20) {
-                        window.player.hp -= 20;
-                        window.player.baseAtk += 2;
-                        window.player.recalculateStats();
-                        window.ui.log("🌑 O altar sugou seu sangue. Você se sente mais forte... e mais frio.", "skill");
+                    if (window.player.cha >= 8) {
+                        window.ui.log("🌿 A deusa ouve sua prece. Você é banhado em luz e completamente curado!", "loot");
+                        window.player.heal(window.player.maxHp); window.player.restoreMp(window.player.maxMp);
                     } else {
-                        window.ui.log("💀 Você está muito fraco para sobreviver ao sacrifício.", "sys");
+                        window.ui.log("🚶 Você orou, mas os deuses parecem distantes hoje.", "sys");
                     }
                 }
             },
             {
-                text: "🙏 Rezar para os Deuses Antigos (Exige Carisma)",
+                text: "🗡️ Afiar a arma no altar sacrilégio (-15 HP)",
                 action: () => {
-                    if (window.player.cha >= 15) {
-                        window.ui.log("✨ Uma luz divina purificou o altar. Você encontrou 40💰 nas cinzas!", "loot");
-                        window.player.gold += 40;
-                    } else {
-                        window.ui.log("🌩️ Os deuses sombrios se irritaram e drenaram sua Mana!", "dmg-taken");
-                        window.player.mp = 0;
-                    }
+                    if (window.player.hp > 15) {
+                        window.player.hp -= 15; window.player.baseAtk += 2; window.player.recalculateStats();
+                        window.ui.log("🌑 A luz se apaga. Sua arma fica mais letal, mas sua alma sofre o custo.", "skill");
+                    } else { window.ui.log("💀 Você está muito fraco para isso.", "sys"); }
                 }
-            },
-            {
-                text: "🚶 Ir embora rápido",
-                action: () => { window.ui.log("🚶 Alguns poderes não devem ser perturbados.", "sys"); }
             }
         ]
     }
@@ -270,7 +211,7 @@ window.player = {
             this.maxHp += 15; this.hp = this.maxHp; this.maxMp += 5; this.mp = this.maxMp; this.baseAtk += 3; this.baseDef += 1; 
             this.str += Math.floor(Math.random() * 2) + 1; this.dex += Math.floor(Math.random() * 2) + 1;
             this.spd += Math.floor(Math.random() * 2) + 1; this.cha += Math.floor(Math.random() * 2) + 1;
-            this.recalculateStats(); window.ui.log(`🎊 NÍVEL UP / LEVEL UP: ${this.lvl}!`, "loot");
+            this.recalculateStats(); window.ui.log(`🎊 NÍVEL UP: ${this.lvl}!`, "loot");
         }
     }
 };
@@ -303,9 +244,10 @@ window.game = {
     
     chooseClass(key) { window.audio.playClick(); this.tempClassKey = key; document.getElementById('class-selection-screen').classList.add('hidden'); document.getElementById('name-selection-screen').classList.remove('hidden'); document.getElementById('input-hero-name').focus(); },
     cancelName() { window.audio.playClick(); this.tempClassKey = null; document.getElementById('name-selection-screen').classList.add('hidden'); document.getElementById('class-selection-screen').classList.remove('hidden'); },
+    
     confirmName() {
         const input = document.getElementById('input-hero-name').value.trim();
-        if (!input) { alert(window.lang === 'pt' ? "Por favor, batize seu herói!" : "Please name your hero!"); return; }
+        if (!input) { alert("Por favor, batize seu herói!"); return; }
         window.audio.playClick(); window.audio.startBGM(); window.player.playerName = input;
         const cls = window.classesData[this.tempClassKey]; window.player.classObj = cls;
         window.player.hp = cls.hp; window.player.maxHp = cls.hp; window.player.mp = cls.mp; window.player.maxMp = cls.mp;
@@ -315,33 +257,36 @@ window.game = {
         document.getElementById('hero-name-display').innerText = window.player.playerName; document.getElementById('hero-icon').innerText = cls.icon; 
         document.getElementById('player-art-icon').innerText = cls.icon; document.getElementById('hero-class-name').innerText = cls.name; document.getElementById('skill-name').innerText = cls.skillName;
         document.getElementById('name-selection-screen').classList.add('hidden'); document.getElementById('main-game-screen').classList.remove('hidden'); document.getElementById('top-menu').classList.remove('hidden');
-        this.state = 'explore'; window.ui.log(`A lenda de ${window.player.playerName} começa!`, "loot"); this.saveGame();
+        this.state = 'explore'; 
+        
+        // Inicia a história principal
+        window.ui.triggerPureStory(
+            "👑 O Sequestro Real",
+            `O reino de Aethelgard está em prantos. A Princesa Seraphina, portadora da Luz Ancestral, foi sequestrada na calada da noite pelo pavoroso Deus da Ruína.\n\nSua majestade declarou: "Aquele que a trouxer de volta terá a salvação do reino". ${window.player.playerName}, prepare sua arma. Sua jornada épica começa agora!`,
+            "Aceitar a Missão"
+        );
+        this.saveGame();
     },
 
     explore() {
         window.audio.playClick();
         let b = Math.floor(window.player.lvl / 10) * 10;
         if (b >= 10 && window.player.highestBossDefeated < b && window.bossesDB[b]) {
-            window.ui.log(`🌩️ CHEFÃO / BOSS!`, "dmg-taken"); setTimeout(() => { window.combat.start(window.bossesDB[b], true, b); }, 1500); return;
+            window.ui.log(`🌩️ CHEFÃO / BOSS DA HISTÓRIA!`, "dmg-taken"); setTimeout(() => { window.combat.start(window.bossesDB[b], true, b); }, 1500); return;
         }
 
         const r = Math.random();
         
-        // NOVO BALANCEAMENTO DA EXPLORAÇÃO
-        // 40% de chance de Combate
         if (r < 0.40) {
             window.combat.start(window.bestiary[Math.floor(Math.random()*window.bestiary.length)], false);
         } 
-        // 25% de chance de Evento de História (Pop-up)
-        else if (r < 0.65) {
+        else if (r < 0.60) {
             window.ui.triggerEvent();
         } 
-        // 20% de chance de Achar Ouro
         else if (r < 0.85) { 
             const g = Math.floor(Math.random() * 20) + 5 + Math.floor(window.player.lvl * 2); window.player.gold += g;
-            window.ui.log(`🌲 Achou/Found ${g}💰 numa clareira.`, "loot"); window.ui.update(); this.saveGame();
+            window.ui.log(`🌲 Achou/Found ${g}💰 num canto escuro.`, "loot"); window.ui.update(); this.saveGame();
         } 
-        // 15% de chance de Achar Equipamento
         else { 
             const iRoll = Math.random(); let dropTemplate;
             if(iRoll < 0.33) dropTemplate = window.lootTables.weapons[Math.floor(Math.random() * window.lootTables.weapons.length)];
@@ -350,7 +295,7 @@ window.game = {
             
             let scaledStat = dropTemplate.stat + Math.floor(window.player.lvl / 2);
             let drop = { ...dropTemplate, stat: scaledStat };
-            window.player.inventory.push(drop); window.ui.log(`🎁 Baú esquecido! Item: <b>${drop.name} (+${drop.stat})</b>!`, "skill");
+            window.player.inventory.push(drop); window.ui.log(`🎁 Pilhagem! Item: <b>${drop.name} (+${drop.stat})</b>!`, "skill");
             window.ui.update(); this.saveGame();
         }
     },
@@ -359,8 +304,8 @@ window.game = {
         window.audio.playClick(); let innPrice = 10;
         if (window.player.gold >= innPrice) {
             window.player.gold -= innPrice; window.player.hp = window.player.maxHp; window.player.mp = window.player.maxMp;
-            window.ui.log(window.lang==='pt'?`🛌 Descansou na pousada local (${innPrice}💰).`:`🛌 Rested (${innPrice}💰).`, "loot"); window.ui.update(); this.saveGame();
-        } else { window.ui.log(window.lang==='pt'?"❌ Ouro insuficiente.":"❌ Not enough gold."); }
+            window.ui.log(`🛌 Descansou e ouviu fofocas sobre o avanço do Deus da Ruína (${innPrice}💰).`, "loot"); window.ui.update(); this.saveGame();
+        } else { window.ui.log("❌ Ouro insuficiente."); }
     }
 };
 
@@ -410,22 +355,35 @@ window.combat = {
     },
     flee() {
         window.audio.playClick();
-        if (this.isBossFight) return window.ui.log("❌ BOSS FIGHT!", "dmg-taken");
+        if (this.isBossFight) return window.ui.log("❌ Não se pode fugir do destino!", "dmg-taken");
         let fleeChance = 0.4 + (window.player.spd / 200); 
-        if (Math.random() < fleeChance) { window.ui.log(window.lang==='pt'?"🏃 Escapou para a floresta!":"🏃 Escaped!"); this.end(); } 
-        else { window.ui.log(window.lang==='pt'?"🏃 Tropeçou e falhou!":"🏃 Failed!", "dmg-taken"); document.getElementById('combat-actions').style.pointerEvents = 'none'; setTimeout(() => this.enemyTurn(), 800); }
+        if (Math.random() < fleeChance) { window.ui.log("🏃 Escapou para as sombras!"); this.end(); } 
+        else { window.ui.log("🏃 Tropeçou e falhou!", "dmg-taken"); document.getElementById('combat-actions').style.pointerEvents = 'none'; setTimeout(() => this.enemyTurn(), 800); }
     },
     win() {
-        window.ui.log(`🏆 Venceu/Win! +${this.enemy.gold}💰, +${this.enemy.xp} EXP.`, "loot");
+        window.ui.log(`🏆 Venceu! +${this.enemy.gold}💰, +${this.enemy.xp} EXP.`, "loot");
         window.player.gold += this.enemy.gold; window.player.gainXp(this.enemy.xp); 
         if (this.isBossFight) {
-            window.player.highestBossDefeated = this.isBossFight; window.ui.log(`👑 <b>CHEFÃO DERROTADO!</b>`, "skill");
-            if (this.isBossFight === 150) { setTimeout(() => { alert("🎉 PARABÉNS! Você derrotou o Deus da Ruína e salvou Aethelgard!"); location.reload(); }, 2000); return; }
+            window.player.highestBossDefeated = this.isBossFight;
+            
+            // Progressão da História pelos Chefes
+            if (this.isBossFight === 10) {
+                window.ui.triggerPureStory("👑 Pista Real", "Ao revistar o trono manchado de sangue do Rei Goblin, você encontra um pedaço do vestido da Princesa Seraphina. Ela passou por aqui, levada em direção às montanhas escuras...", "Continuar a Busca");
+            } else if (this.isBossFight === 50) {
+                window.ui.triggerPureStory("🐉 O Portal Sombrio", "Com seu último fôlego, o Dragão Negro rosnou: 'Você é tolo... o Deus a levou para o Abismo...'. O chão treme e os portões do submundo se abrem diante de você.", "Descer ao Abismo");
+            } else if (this.isBossFight === 150) {
+                window.ui.triggerPureStory("🎉 O Triunfo da Luz", `A divindade sombria despenca diante do seu poder avassalador. Nos fundos do templo colossal, presa por correntes obscuras que agora se quebram, está a Princesa Seraphina.\n\nEla abre os olhos e sorri para você. "Você me salvou, ${window.player.playerName}. E salvou Aethelgard."\n\nPARABÉNS! Você zerou o jogo!`, "Renacer e Jogar Novamente", () => {
+                    localStorage.removeItem('aethelgard_save'); location.reload();
+                });
+                return;
+            } else {
+                window.ui.log(`👑 <b>CHEFÃO DERROTADO! O caminho se abre.</b>`, "skill");
+            }
         }
         window.game.saveGame(); this.end();
     },
     lose() {
-        window.ui.log(`💀 <b>MORTO / DEAD.</b>`, "dmg-taken"); document.getElementById('combat-actions').style.display = 'none';
+        window.ui.log(`💀 <b>MORTO / DEAD. A princesa está perdida.</b>`, "dmg-taken"); document.getElementById('combat-actions').style.display = 'none';
         localStorage.removeItem('aethelgard_save'); setTimeout(() => location.reload(), 4000);
     },
     end() { 
@@ -464,7 +422,7 @@ window.ui = {
         document.getElementById('inv-bag').innerHTML = bagHTML;
     },
     
-    // Funções do Evento de História
+    // Mostra as interações de escolha com NPCs
     triggerEvent() {
         window.audio.playClick();
         const ev = window.events[Math.floor(Math.random() * window.events.length)];
@@ -481,13 +439,31 @@ window.ui = {
             btn.onclick = () => {
                 window.audio.playClick();
                 document.getElementById('event-modal').classList.add('hidden');
-                choice.action(); // Executa a ação da escolha
-                window.ui.update();
-                window.game.saveGame();
+                choice.action();
+                window.ui.update(); window.game.saveGame();
             };
             choicesContainer.appendChild(btn);
         });
+        document.getElementById('event-modal').classList.remove('hidden');
+    },
 
+    // Mostra apenas um popup com a evolução da história (usado em chefes)
+    triggerPureStory(title, desc, btnText, callback = null) {
+        document.getElementById('event-title').innerText = title;
+        document.getElementById('event-desc').innerText = desc;
+        
+        const choicesContainer = document.getElementById('event-choices');
+        choicesContainer.innerHTML = '';
+        
+        let btn = document.createElement('button');
+        btn.className = 'btn-medieval';
+        btn.innerText = btnText;
+        btn.onclick = () => {
+            window.audio.playClick();
+            document.getElementById('event-modal').classList.add('hidden');
+            if(callback) callback();
+        };
+        choicesContainer.appendChild(btn);
         document.getElementById('event-modal').classList.remove('hidden');
     },
 
