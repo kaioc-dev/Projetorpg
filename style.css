@@ -2,45 +2,54 @@
     --bg-dungeon: #000; --wood-dark: #1f110c; --wood-light: #3e2112; --gold: #ffd700;
     --parchment: #e8dcc4; --text-dark: #2c1a0c; --text-light: #f5f5dc;
 }
-
 * { box-sizing: border-box; }
-body { background-color: var(--bg-dungeon); color: var(--text-light); margin: 0; padding: 0; height: 100dvh; overflow: hidden; display: flex; justify-content: center; }
+body { background-color: var(--bg-dungeon); color: var(--text-light); margin: 0; padding: 0; height: 100dvh; overflow: hidden; display: flex; justify-content: center; font-family: 'Metamorphous', cursive; }
 
 .wood-board { 
     width: 100%; height: 100dvh; max-width: 600px; 
     background: linear-gradient(135deg, var(--wood-dark), var(--wood-light));
-    /* CORREÇÃO AQUI: Respeita a Safe Area inferior do celular */
     padding: calc(15px + env(safe-area-inset-top)) 15px calc(20px + env(safe-area-inset-bottom)) 15px;
-    display: flex; flex-direction: column; position: relative;
+    display: flex; flex-direction: column; position: relative; border-left: 4px solid #0a0503; border-right: 4px solid #0a0503;
 }
 
-#controls { 
-    margin-top: auto; 
-    /* Garante que os botões fiquem acima da barra de gestos do iPhone/Android */
-    padding-bottom: env(safe-area-inset-bottom);
-}
-
+#controls { margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
 #exploration-actions, #combat-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .purchase { grid-column: span 2; }
 
 .btn-medieval {
-    font-family: 'Cinzel Decorative', serif; font-weight: bold; color: #f5f5dc;
+    font-family: 'Cinzel Decorative', serif; font-weight: bold; color: #f5f5dc; font-size: 0.9em;
     background: linear-gradient(#5d4037, #3e2723); border: 2px solid #2a1f1c; border-radius: 6px;
-    padding: 14px; cursor: pointer; width: 100%; transition: 0.1s;
+    padding: 14px; cursor: pointer; width: 100%; transition: 0.1s; text-shadow: 1px 1px 2px #000;
 }
 .btn-medieval:active { transform: translateY(2px); }
 .attack { background: linear-gradient(#c62828, #b71c1c) !important; }
 .skill { background: linear-gradient(#512da8, #311b92) !important; }
 
-/* Outros estilos permanecem conforme seu original para manter o design */
-.dark-parchment { height: 120px; background: #0a0706; border: 3px solid #3e2723; padding: 10px; overflow-y: auto; margin-bottom: 10px; }
-.parchment { background: radial-gradient(circle, #f0e6d2, #d8c3a5); color: var(--text-dark); padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; margin-bottom: 10px; }
-.bars { width: 170px; }
-.bar-container { width: 100%; background: #111; height: 14px; position: relative; border-radius: 4px; overflow: hidden; margin: 2px 0; border: 1px solid #333; }
+.dark-parchment { height: 120px; background: #0a0706; border: 3px solid #3e2723; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 6px;}
+#game-log { list-style: none; padding: 0; margin: 0; font-size: 0.85em; }
+#game-log li { margin-bottom: 5px; color: #ddd; border-bottom: 1px solid #222; }
+.loot { color: #69f0ae !important; } .dmg-taken { color: #ff5252 !important; } .skill { color: #b388ff !important; }
+
+.parchment { background: radial-gradient(circle, #f0e6d2, #d8c3a5); color: var(--text-dark); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; margin-bottom: 12px; border: 2px solid #8b6b4a; }
+.lvl-badge { background: #3e2723; color: gold; padding: 2px 6px; border-radius: 10px; font-size: 0.8em; }
+
+.bars { width: 180px; }
+.stat-row { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-weight: bold; font-size: 0.8em;}
+.bar-container { flex-grow: 1; background: #111; height: 16px; position: relative; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
 .bar { height: 100%; transition: width 0.3s; }
-.hp { background: #c62828; } .mp { background: #311b92; } .xp { background: #0288d1; } .enemy-hp { background: #c62828; }
-.bar-text { position: absolute; width: 100%; text-align: center; font-size: 10px; color: white; top: 0; font-weight: bold; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.inventory-panel { width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; flex-direction: column; display: flex; }
+.hp { background: linear-gradient(to right, #b71c1c, #ff5252); } .mp { background: linear-gradient(to right, #311b92, #5e35b1); } .xp { background: #0288d1; } .enemy-hp { background: #c62828; }
+.bar-text { position: absolute; width: 100%; text-align: center; font-size: 10px; color: white; top: 1px; text-shadow: 1px 1px 2px #000; }
+
+.stone-bg { background: radial-gradient(circle, #2a2a2a, #111); border: 3px solid #444; border-radius: 10px; padding: 20px; box-shadow: inset 0 0 30px #000; }
+.vs-container { display: flex; justify-content: space-around; align-items: center; margin-bottom: 15px; }
+.portrait-frame { width: 70px; height: 70px; display: flex; justify-content: center; align-items: center; border-radius: 8px; font-size: 40px; background: #1a1a1a; border: 3px solid #444; }
+.gold-frame { border-color: gold; } .iron-frame { border-color: #ff5252; }
+.label { display: block; text-align: center; font-size: 0.8em; margin-top: 5px; font-weight: bold; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+.inventory-panel { width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; flex-direction: column; display: flex; border: 3px solid #8b6b4a; }
+.inv-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.1); padding: 8px; margin-bottom: 5px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); font-size: 0.9em; font-weight: bold;}
+.inv-btn { background: #3e2723; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+.medieval-input { width: 100%; padding: 15px; background: #0a0706; color: gold; border: 2px solid #8b6b4a; font-family: 'Cinzel Decorative'; text-align: center; font-size: 1.2em; border-radius: 6px; }
 .hidden { display: none !important; }
-.medieval-input { width: 100%; padding: 12px; background: #000; color: gold; border: 2px solid #8b6b4a; font-family: 'Cinzel Decorative'; text-align: center; }
