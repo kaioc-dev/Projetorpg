@@ -17,8 +17,9 @@ body { background-color: var(--bg-dungeon); color: var(--text-light); display: f
     position: relative; box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
 }
 
-#top-menu { position: fixed; top: 15px; right: 50%; transform: translateX(280px); display: flex; gap: 10px; z-index: 50; }
-@media (max-width: 600px) { #top-menu { right: 15px; transform: none; } }
+/* Menu movido perfeitamente para o canto superior direito */
+#top-menu { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 50; }
+
 .top-btn { 
     width: 45px; height: 45px; padding: 0; display: flex; justify-content: center; align-items: center; 
     font-size: 1.2em; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1); 
@@ -78,7 +79,9 @@ h1, h2, h3 { font-family: 'Cinzel Decorative', serif; text-align: center; color:
 
 #controls { margin-top: auto; padding-bottom: 10px; }
 #exploration-actions, #combat-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px;}
-.purchase, .flee { grid-column: span 2; }
+
+/* Removido a classe .flee daqui, para formar o grid de 4 botões perfeito */
+.purchase { grid-column: span 2; }
 
 .btn-medieval {
     font-family: 'Cinzel Decorative', serif; font-weight: bold; font-size: 0.9em; color: #f5f5dc;
