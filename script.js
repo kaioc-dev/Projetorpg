@@ -5,7 +5,7 @@ var player = {
     classObj: null,
     hp: 0, maxHp: 0, mp: 0, maxMp: 0, atk: 0, 
     lvl: 1, xp: 0, xpToNext: 50, gold: 0, potions: 3,
-    highestBossDefeated: 0, // Controla o progresso dos chefões
+    highestBossDefeated: 0,
     
     inventory: { equipment: [], items: [] },
 
@@ -28,15 +28,14 @@ var player = {
     },
 
     gainXp(amount) {
-        if (this.lvl >= 50) return; // Nível Máximo
+        if (this.lvl >= 50) return; // Limite de nível
         
         this.xp += amount;
         if (this.xp >= this.xpToNext) {
             this.lvl++; 
             this.xp -= this.xpToNext; 
-            this.xpToNext = Math.floor(this.xpToNext * 1.5); // Escala de XP necessária
+            this.xpToNext = Math.floor(this.xpToNext * 1.5);
             
-            // Atributos sobem ao upar
             this.maxHp += 15; this.hp = this.maxHp; 
             this.maxMp += 5; this.mp = this.maxMp;
             this.atk += 4;
@@ -48,7 +47,7 @@ var player = {
     addLoot(type, itemName) {
         if(type === 'equip') {
             this.inventory.equipment.push(itemName);
-            this.atk += 3; // Bônus de ataque
+            this.atk += 3;
         } else {
             this.inventory.items.push(itemName);
         }
@@ -67,7 +66,7 @@ var classesData = {
 };
 
 // ==========================================
-// BANCO DE DADOS (Monstros, Bosses, NPCs)
+// BANCO DE DADOS
 // ==========================================
 var bestiary = [
     { name: "Goblin Rastejante", baseHp: 30, baseAtk: 5, baseXp: 25, baseGold: 10, icon: "👺" },
@@ -76,13 +75,12 @@ var bestiary = [
     { name: "Esqueleto Amaldiçoado", baseHp: 60, baseAtk: 10, baseXp: 55, baseGold: 20, icon: "💀" }
 ];
 
-// Chefões a cada 10 níveis
 var bossesDB = {
     10: { name: "Rei Goblin", baseHp: 150, baseAtk: 15, baseXp: 300, baseGold: 100, icon: "👑👺" },
     20: { name: "Lobo Alfa Sangrento", baseHp: 200, baseAtk: 25, baseXp: 800, baseGold: 250, icon: "🐺🩸" },
     30: { name: "General Orc Destruidor", baseHp: 350, baseAtk: 40, baseXp: 2000, baseGold: 500, icon: "🪓👹" },
     40: { name: "Lich Ancião", baseHp: 500, baseAtk: 60, baseXp: 5000, baseGold: 1000, icon: "🧙‍♂️💀" },
-    50: { name: "Dragão Negro Primordial", baseHp: 1000, baseAtk: 90, baseXp: 0, baseGold: 5000, icon: "🐉🔥" } // Boss Final
+    50: { name: "Dragão Negro Primordial", baseHp: 1000, baseAtk: 90, baseXp: 0, baseGold: 5000, icon: "🐉🔥" }
 };
 
 var lootTables = {
@@ -97,7 +95,7 @@ var npcs = [
 ];
 
 // ==========================================
-// MOTOR DE EVENTOS E EXPLORAÇÃO
+// MOTOR DE EVENTOS
 // ==========================================
 var game = {
     state: 'menu',
@@ -123,7 +121,6 @@ var game = {
     },
 
     explore() {
-        // CHECAGEM DE CHEFÃO: Se o nível for múltiplo de 10 e o boss não foi morto
         let currentDecade = Math.floor(player.lvl / 10) * 10;
         if (currentDecade >= 10 && player.highestBossDefeated < currentDecade) {
             ui.log(`🌩️ O chão treme... Um ser colossal se aproxima!`, "dmg-taken");
@@ -131,19 +128,18 @@ var game = {
             return;
         }
 
-        // Exploração Normal
         const roll = Math.random();
         
-        if (roll < 0.45) { // 45% Batalha
+        if (roll < 0.45) { 
             const randomEnemy = bestiary[Math.floor(Math.random() * bestiary.length)];
             combat.start(randomEnemy, false);
         } 
-        else if (roll < 0.70) { // 25% Ouro
+        else if (roll < 0.70) { 
             const foundGold = Math.floor(Math.random() * 20) + 5;
             player.gold += foundGold;
             ui.log(`🌲 Achou um saco com ${foundGold}💰.`, "loot");
         } 
-        else if (roll < 0.85) { // 15% Itens
+        else if (roll < 0.85) { 
             if(Math.random() > 0.5) {
                 const eq = lootTables.equips[Math.floor(Math.random() * lootTables.equips.length)];
                 player.addLoot('equip', eq);
@@ -154,7 +150,7 @@ var game = {
                 ui.log(`🎁 Achou um objeto: <b>${item}</b>.`, "loot");
             }
         } 
-        else { // 15% NPC
+        else { 
             const npc = npcs[Math.floor(Math.random() * npcs.length)];
             ui.log(`⛺ Você cruzou com <b>${npc.name}</b>.`, "skill");
             npc.encounter();
@@ -176,13 +172,12 @@ var game = {
 // ==========================================
 var combat = {
     enemy: null,
-    isBossFight: 0, // Guarda o nível do boss, se for 0 não é boss
+    isBossFight: 0, 
 
     start(enemyData, isBoss = false, bossLevel = 0) {
         game.state = 'combat';
         this.isBossFight = isBoss ? bossLevel : 0;
         
-        // Multiplicador de dificuldade cresce 20% a cada nível do jogador
         const scale = 1 + ((player.lvl - 1) * 0.20); 
         
         this.enemy = { 
@@ -194,7 +189,7 @@ var combat = {
         };
         
         if(isBoss) {
-            document.getElementById('battle-arena').style.borderColor = "#ff5252"; // Destaca a arena
+            document.getElementById('battle-arena').style.borderColor = "#ff5252";
             ui.log(`⚠️ CHEFÃO: <b>${this.enemy.name} (Nvl ${this.enemy.lvl})</b> ataca!`, "dmg-taken");
         } else {
             document.getElementById('battle-arena').style.borderColor = "#333";
@@ -250,10 +245,7 @@ var combat = {
     },
 
     flee() {
-        if (this.isBossFight) {
-            ui.log("❌ VOCÊ NÃO PODE FUGIR DE UM CHEFÃO!", "dmg-taken");
-            return;
-        }
+        if (this.isBossFight) return ui.log("❌ VOCÊ NÃO PODE FUGIR DE UM CHEFÃO!", "dmg-taken");
 
         if (Math.random() > 0.4) { ui.log("🏃 Escapou com sucesso!"); this.end(); } 
         else { ui.log("🏃 Fuga bloqueada!", "dmg-taken"); document.getElementById('combat-actions').style.pointerEvents = 'none'; setTimeout(() => this.enemyTurn(), 800); }
@@ -266,10 +258,9 @@ var combat = {
 
         if (this.isBossFight) {
             player.highestBossDefeated = this.isBossFight;
-            ui.log(`👑 <b>CHEFÃO DERROTADO!</b> Você superou a provação de nível ${this.isBossFight}.`, "skill");
+            ui.log(`👑 <b>CHEFÃO DERROTADO!</b>`, "skill");
             
             if (this.isBossFight === 50) {
-                // JOGO ZERADO!
                 setTimeout(() => {
                     alert("🎉 PARABÉNS! Você derrotou o Dragão Negro Primordial e salvou Aethelgard! Você zerou o jogo!");
                     location.reload();
@@ -277,7 +268,6 @@ var combat = {
                 return;
             }
         }
-        
         this.end();
     },
 
@@ -328,7 +318,6 @@ var ui = {
         const mpPct = Math.max(0, (player.mp / player.maxMp) * 100);
         document.getElementById('mp-bar').style.width = `${mpPct}%`;
         
-        // Se Nível 50, trava barra de XP em 100%
         const xpPct = player.lvl >= 50 ? 100 : Math.min(100, (player.xp / player.xpToNext) * 100);
         document.getElementById('xp-bar').style.width = `${xpPct}%`;
 
@@ -373,9 +362,27 @@ var ui = {
 };
 
 // ==========================================
-// EXPOSIÇÃO GLOBAL (O Truque que conserta os Botões)
+// CONEXÃO DE BOTÕES (A SOLUÇÃO DEFINITIVA)
 // ==========================================
-window.game = game;
-window.player = player;
-window.combat = combat;
-window.ui = ui;
+document.addEventListener("DOMContentLoaded", () => {
+    // Tela de Seleção
+    document.getElementById('btn-cavaleiro').addEventListener('click', () => game.chooseClass('cavaleiro'));
+    document.getElementById('btn-mago').addEventListener('click', () => game.chooseClass('mago'));
+    document.getElementById('btn-arqueiro').addEventListener('click', () => game.chooseClass('arqueiro'));
+    document.getElementById('btn-anao').addEventListener('click', () => game.chooseClass('anao'));
+
+    // Inventário
+    document.getElementById('btn-inventory').addEventListener('click', () => ui.openInventory());
+    document.getElementById('btn-close-inv').addEventListener('click', () => ui.closeInventory());
+
+    // Exploração
+    document.getElementById('btn-explore').addEventListener('click', () => game.explore());
+    document.getElementById('btn-rest').addEventListener('click', () => game.rest());
+    document.getElementById('btn-buy-potion').addEventListener('click', () => player.buyPotion());
+
+    // Combate
+    document.getElementById('btn-attack').addEventListener('click', () => combat.attack());
+    document.getElementById('btn-skill').addEventListener('click', () => combat.useSkill());
+    document.getElementById('btn-use-potion').addEventListener('click', () => player.usePotion());
+    document.getElementById('btn-flee').addEventListener('click', () => combat.flee());
+});
