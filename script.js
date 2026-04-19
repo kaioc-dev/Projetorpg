@@ -1,16 +1,13 @@
 // ==========================================
-// ESTADO DO JOGADOR E INVENTÁRIO (Usando 'var' para acesso global)
+// ESTADO DO JOGADOR
 // ==========================================
 var player = {
     classObj: null,
     hp: 0, maxHp: 0, mp: 0, maxMp: 0, atk: 0, 
     lvl: 1, xp: 0, xpToNext: 50, gold: 0, potions: 3,
+    highestBossDefeated: 0, // Controla o progresso dos chefões
     
-    // Arrays para guardar os loots
-    inventory: {
-        equipment: [],
-        items: []
-    },
+    inventory: { equipment: [], items: [] },
 
     heal(amount) { this.hp = Math.min(this.hp + amount, this.maxHp); ui.update(); },
     restoreMp(amount) { this.mp = Math.min(this.mp + amount, this.maxMp); ui.update(); },
@@ -19,9 +16,9 @@ var player = {
         if (this.potions <= 0) return ui.log("❌ Sem poções!", "dmg-taken");
         if (this.hp === this.maxHp && this.mp === this.maxMp) return ui.log("Vida e Mana já estão cheios.");
         this.potions--; 
-        this.heal(40); 
-        this.restoreMp(20);
-        ui.log(`🧪 Usou poção: +40 Vida, +20 Mana.`, "loot");
+        this.heal(50); 
+        this.restoreMp(30);
+        ui.log(`🧪 Usou poção: +50 Vida, +30 Mana.`, "loot");
         if (game.state === 'combat') setTimeout(() => combat.enemyTurn(), 800);
     },
 
@@ -31,20 +28,27 @@ var player = {
     },
 
     gainXp(amount) {
+        if (this.lvl >= 50) return; // Nível Máximo
+        
         this.xp += amount;
         if (this.xp >= this.xpToNext) {
-            this.lvl++; this.xp -= this.xpToNext; this.xpToNext = Math.floor(this.xpToNext * 1.5);
+            this.lvl++; 
+            this.xp -= this.xpToNext; 
+            this.xpToNext = Math.floor(this.xpToNext * 1.5); // Escala de XP necessária
+            
+            // Atributos sobem ao upar
             this.maxHp += 15; this.hp = this.maxHp; 
             this.maxMp += 5; this.mp = this.maxMp;
             this.atk += 4;
-            ui.log(`🎊 NÍVEL UP! Nível ${this.lvl}! (+Atributos)`, "loot");
+            
+            ui.log(`🎊 NÍVEL UP! Você alcançou o Nível ${this.lvl}!`, "loot");
         }
     },
 
     addLoot(type, itemName) {
         if(type === 'equip') {
             this.inventory.equipment.push(itemName);
-            this.atk += 2; // Bônus passivo de ataque ao achar equipamento
+            this.atk += 3; // Bônus de ataque
         } else {
             this.inventory.items.push(itemName);
         }
@@ -63,27 +67,37 @@ var classesData = {
 };
 
 // ==========================================
-// BANCO DE DADOS (Monstros, NPCs e Itens)
+// BANCO DE DADOS (Monstros, Bosses, NPCs)
 // ==========================================
 var bestiary = [
     { name: "Goblin Rastejante", baseHp: 30, baseAtk: 5, baseXp: 25, baseGold: 10, icon: "👺" },
     { name: "Lobo Faminto", baseHp: 45, baseAtk: 8, baseXp: 40, baseGold: 15, icon: "🐺" },
-    { name: "Orc Saqueador", baseHp: 80, baseAtk: 12, baseXp: 70, baseGold: 35, icon: "👹" }
+    { name: "Orc Saqueador", baseHp: 80, baseAtk: 12, baseXp: 70, baseGold: 35, icon: "👹" },
+    { name: "Esqueleto Amaldiçoado", baseHp: 60, baseAtk: 10, baseXp: 55, baseGold: 20, icon: "💀" }
 ];
 
+// Chefões a cada 10 níveis
+var bossesDB = {
+    10: { name: "Rei Goblin", baseHp: 150, baseAtk: 15, baseXp: 300, baseGold: 100, icon: "👑👺" },
+    20: { name: "Lobo Alfa Sangrento", baseHp: 200, baseAtk: 25, baseXp: 800, baseGold: 250, icon: "🐺🩸" },
+    30: { name: "General Orc Destruidor", baseHp: 350, baseAtk: 40, baseXp: 2000, baseGold: 500, icon: "🪓👹" },
+    40: { name: "Lich Ancião", baseHp: 500, baseAtk: 60, baseXp: 5000, baseGold: 1000, icon: "🧙‍♂️💀" },
+    50: { name: "Dragão Negro Primordial", baseHp: 1000, baseAtk: 90, baseXp: 0, baseGold: 5000, icon: "🐉🔥" } // Boss Final
+};
+
 var lootTables = {
-    equips: ["Espada de Ferro Enferrujada", "Escudo de Madeira", "Anel de Cobre (+Ataque)", "Botas de Couro", "Colar Místico"],
+    equips: ["Espada de Ferro Enferrujada", "Escudo de Madeira", "Anel de Cobre (+Atk)", "Botas de Couro", "Colar Místico"],
     items: ["Dente de Lobo", "Osso Misterioso", "Pedaço de Tecido Sujo", "Gema Brilhante", "Pó Mágico"]
 };
 
 var npcs = [
-    { name: "Curandeira Cega", encounter: () => { player.heal(50); ui.log("🧙‍♀️ 'Deixe-me tocar suas feridas'. +50 Vida.", "loot"); } },
-    { name: "Mendigo Sábio", encounter: () => { player.gainXp(30); ui.log("🧙‍♂️ Ele sussurra segredos antigos. +30 EXP.", "loot"); ui.update(); } },
-    { name: "Ladrão Ágil", encounter: () => { if(player.gold > 5) { player.gold -= 5; ui.log("🥷 Suas moedas estão mais leves! (-5💰)", "dmg-taken"); } else { ui.log("🥷 Um vulto o revista, mas desiste.", "loot"); } ui.update(); } }
+    { name: "Curandeira Cega", encounter: () => { player.heal(80); ui.log("🧙‍♀️ 'Deixe-me curar suas feridas'. +80 Vida.", "loot"); } },
+    { name: "Mendigo Sábio", encounter: () => { player.gainXp(50); ui.log("🧙‍♂️ Ele sussurra segredos antigos. +50 EXP.", "loot"); ui.update(); } },
+    { name: "Ladrão Ágil", encounter: () => { if(player.gold > 10) { player.gold -= 10; ui.log("🥷 Suas moedas estão mais leves! (-10💰)", "dmg-taken"); } else { ui.log("🥷 Um vulto o revista, mas desiste.", "loot"); } ui.update(); } }
 ];
 
 // ==========================================
-// MOTOR DE EVENTOS
+// MOTOR DE EVENTOS E EXPLORAÇÃO
 // ==========================================
 var game = {
     state: 'menu',
@@ -95,45 +109,52 @@ var game = {
         player.mp = cls.mp; player.maxMp = cls.mp;
         player.atk = cls.atk;
         
-        // Atualiza UI baseada na classe
         document.getElementById('hero-icon').innerText = cls.icon;
         document.getElementById('player-art-icon').innerText = cls.icon;
         document.getElementById('hero-class-name').innerText = cls.name;
         document.getElementById('skill-name').innerText = cls.skillName;
 
-        // Troca de tela
         document.getElementById('class-selection-screen').classList.add('hidden');
         document.getElementById('main-game-screen').classList.remove('hidden');
         
         this.state = 'explore';
-        ui.log(`Bem-vindo, <b>${cls.name}</b>. Sua jornada começa.`, "loot");
+        ui.log(`Bem-vindo, <b>${cls.name}</b>. Chegue ao nível 50 para salvar o reino!`, "loot");
         ui.update();
     },
 
     explore() {
+        // CHECAGEM DE CHEFÃO: Se o nível for múltiplo de 10 e o boss não foi morto
+        let currentDecade = Math.floor(player.lvl / 10) * 10;
+        if (currentDecade >= 10 && player.highestBossDefeated < currentDecade) {
+            ui.log(`🌩️ O chão treme... Um ser colossal se aproxima!`, "dmg-taken");
+            setTimeout(() => { combat.start(bossesDB[currentDecade], true, currentDecade); }, 1500);
+            return;
+        }
+
+        // Exploração Normal
         const roll = Math.random();
         
-        if (roll < 0.40) { // 40% de chance Batalha
+        if (roll < 0.45) { // 45% Batalha
             const randomEnemy = bestiary[Math.floor(Math.random() * bestiary.length)];
-            combat.start(randomEnemy);
+            combat.start(randomEnemy, false);
         } 
-        else if (roll < 0.65) { // 25% de chance Ouro
-            const foundGold = Math.floor(Math.random() * 15) + 5;
+        else if (roll < 0.70) { // 25% Ouro
+            const foundGold = Math.floor(Math.random() * 20) + 5;
             player.gold += foundGold;
             ui.log(`🌲 Achou um saco com ${foundGold}💰.`, "loot");
         } 
-        else if (roll < 0.85) { // 20% de chance Encontrar Item
+        else if (roll < 0.85) { // 15% Itens
             if(Math.random() > 0.5) {
                 const eq = lootTables.equips[Math.floor(Math.random() * lootTables.equips.length)];
                 player.addLoot('equip', eq);
-                ui.log(`🎁 Achou equipamento: <b>${eq}</b>! (+2 Ataque)`, "loot");
+                ui.log(`🎁 Achou equipamento: <b>${eq}</b>! (+3 Ataque)`, "skill");
             } else {
                 const item = lootTables.items[Math.floor(Math.random() * lootTables.items.length)];
                 player.addLoot('item', item);
                 ui.log(`🎁 Achou um objeto: <b>${item}</b>.`, "loot");
             }
         } 
-        else { // 15% de chance Encontrar NPC
+        else { // 15% NPC
             const npc = npcs[Math.floor(Math.random() * npcs.length)];
             ui.log(`⛺ Você cruzou com <b>${npc.name}</b>.`, "skill");
             npc.encounter();
@@ -146,7 +167,7 @@ var game = {
             if (player.hp === player.maxHp && player.mp === player.maxMp) return ui.log("Você já está descansado.");
             player.gold -= 10; player.hp = player.maxHp; player.mp = player.maxMp;
             ui.log(`🛌 Descansou na pousada. Vida e Mana restaurados!`, "loot"); ui.update();
-        } else { ui.log("❌ Ouro insuficiente para dormir."); }
+        } else { ui.log("❌ Ouro insuficiente para dormir (10💰)."); }
     }
 };
 
@@ -155,9 +176,13 @@ var game = {
 // ==========================================
 var combat = {
     enemy: null,
+    isBossFight: 0, // Guarda o nível do boss, se for 0 não é boss
 
-    start(enemyData) {
+    start(enemyData, isBoss = false, bossLevel = 0) {
         game.state = 'combat';
+        this.isBossFight = isBoss ? bossLevel : 0;
+        
+        // Multiplicador de dificuldade cresce 20% a cada nível do jogador
         const scale = 1 + ((player.lvl - 1) * 0.20); 
         
         this.enemy = { 
@@ -165,17 +190,24 @@ var combat = {
             hp: Math.floor(enemyData.baseHp * scale), maxHp: Math.floor(enemyData.baseHp * scale), 
             atk: Math.floor(enemyData.baseAtk * scale), 
             xp: Math.floor(enemyData.baseXp * scale), gold: Math.floor(enemyData.baseGold * scale), 
-            icon: enemyData.icon, lvl: player.lvl
+            icon: enemyData.icon, lvl: isBoss ? bossLevel : player.lvl
         };
         
-        ui.log(`⚠️ <b>${this.enemy.name} (Nvl ${this.enemy.lvl})</b> ataca!`, "dmg-taken");
+        if(isBoss) {
+            document.getElementById('battle-arena').style.borderColor = "#ff5252"; // Destaca a arena
+            ui.log(`⚠️ CHEFÃO: <b>${this.enemy.name} (Nvl ${this.enemy.lvl})</b> ataca!`, "dmg-taken");
+        } else {
+            document.getElementById('battle-arena').style.borderColor = "#333";
+            ui.log(`⚠️ <b>${this.enemy.name} (Nvl ${this.enemy.lvl})</b> se aproxima!`, "dmg-taken");
+        }
+
         ui.toggleMode(true); ui.update();
     },
 
     attack() {
         if (!this.enemy || this.enemy.hp <= 0) return;
         ui.animate('player-portrait', 'anim-attack');
-        const damage = player.atk + Math.floor(Math.random() * 6);
+        const damage = player.atk + Math.floor(Math.random() * 8);
         this.processPlayerDamage(damage, `⚔️ Ataque: <b>${damage}</b> de dano!`);
     },
 
@@ -191,7 +223,7 @@ var combat = {
         ui.update();
         ui.animate('player-portrait', 'anim-attack');
         
-        const damage = Math.floor((player.atk * cls.skillMult)) + Math.floor(Math.random() * 10);
+        const damage = Math.floor((player.atk * cls.skillMult)) + Math.floor(Math.random() * 15);
         this.processPlayerDamage(damage, `✨ <b>${cls.skillName}</b> causou <b>${damage}</b> de dano!`, "skill");
     },
 
@@ -201,14 +233,14 @@ var combat = {
         ui.animate('enemy-portrait', 'anim-shake'); ui.update();
         document.getElementById('combat-actions').style.pointerEvents = 'none';
 
-        if (this.enemy.hp <= 0) setTimeout(() => this.win(), 600);
-        else setTimeout(() => this.enemyTurn(), 800);
+        if (this.enemy.hp <= 0) setTimeout(() => this.win(), 800);
+        else setTimeout(() => this.enemyTurn(), 1000);
     },
 
     enemyTurn() {
         if (!this.enemy || player.hp <= 0) return;
         ui.animate('enemy-portrait', 'anim-attack');
-        const enemyDamage = this.enemy.atk + Math.floor(Math.random() * 4);
+        const enemyDamage = this.enemy.atk + Math.floor(Math.random() * 6);
         player.hp -= enemyDamage;
         ui.log(`🩸 O inimigo contra-ataca: <b>${enemyDamage}</b> de dano.`, "dmg-taken");
         ui.animate('player-portrait', 'anim-shake'); ui.update();
@@ -218,26 +250,56 @@ var combat = {
     },
 
     flee() {
+        if (this.isBossFight) {
+            ui.log("❌ VOCÊ NÃO PODE FUGIR DE UM CHEFÃO!", "dmg-taken");
+            return;
+        }
+
         if (Math.random() > 0.4) { ui.log("🏃 Escapou com sucesso!"); this.end(); } 
         else { ui.log("🏃 Fuga bloqueada!", "dmg-taken"); document.getElementById('combat-actions').style.pointerEvents = 'none'; setTimeout(() => this.enemyTurn(), 800); }
     },
 
     win() {
         ui.log(`🏆 Venceu! +${this.enemy.gold}💰, +${this.enemy.xp} EXP.`, "loot");
-        player.gold += this.enemy.gold; player.gainXp(this.enemy.xp); this.end();
+        player.gold += this.enemy.gold; 
+        player.gainXp(this.enemy.xp); 
+
+        if (this.isBossFight) {
+            player.highestBossDefeated = this.isBossFight;
+            ui.log(`👑 <b>CHEFÃO DERROTADO!</b> Você superou a provação de nível ${this.isBossFight}.`, "skill");
+            
+            if (this.isBossFight === 50) {
+                // JOGO ZERADO!
+                setTimeout(() => {
+                    alert("🎉 PARABÉNS! Você derrotou o Dragão Negro Primordial e salvou Aethelgard! Você zerou o jogo!");
+                    location.reload();
+                }, 2000);
+                return;
+            }
+        }
+        
+        this.end();
     },
 
     lose() {
-        ui.log(`💀 <b>MORTO.</b> A tela vai reiniciar.`, "dmg-taken");
+        ui.log(`💀 <b>A SUA LENDA ACABA AQUI...</b>`, "dmg-taken");
         document.getElementById('combat-actions').style.display = 'none';
-        setTimeout(() => location.reload(), 3000);
+        setTimeout(() => location.reload(), 4000);
     },
 
-    end() { game.state = 'explore'; this.enemy = null; document.getElementById('combat-actions').style.pointerEvents = 'auto'; ui.toggleMode(false); ui.update(); }
+    end() { 
+        game.state = 'explore'; 
+        this.enemy = null; 
+        this.isBossFight = 0;
+        document.getElementById('combat-actions').style.pointerEvents = 'auto'; 
+        document.getElementById('battle-arena').style.borderColor = "#333";
+        ui.toggleMode(false); 
+        ui.update(); 
+    }
 };
 
 // ==========================================
-// GERENCIADOR UI
+// GERENCIADOR VISUAL (UI)
 // ==========================================
 var ui = {
     log(message, className = "") {
@@ -265,7 +327,9 @@ var ui = {
         document.getElementById('hp-bar').style.width = `${hpPct}%`;
         const mpPct = Math.max(0, (player.mp / player.maxMp) * 100);
         document.getElementById('mp-bar').style.width = `${mpPct}%`;
-        const xpPct = Math.min(100, (player.xp / player.xpToNext) * 100);
+        
+        // Se Nível 50, trava barra de XP em 100%
+        const xpPct = player.lvl >= 50 ? 100 : Math.min(100, (player.xp / player.xpToNext) * 100);
         document.getElementById('xp-bar').style.width = `${xpPct}%`;
 
         if (combat.enemy) {
@@ -307,3 +371,11 @@ var ui = {
         setTimeout(() => el.classList.remove(animationClass), 350);
     }
 };
+
+// ==========================================
+// EXPOSIÇÃO GLOBAL (O Truque que conserta os Botões)
+// ==========================================
+window.game = game;
+window.player = player;
+window.combat = combat;
+window.ui = ui;
