@@ -34,9 +34,16 @@ window.audio = {
     
     toggleMute() {
         this.muted = !this.muted;
-        document.getElementById('btn-sound').innerText = this.muted ? '🔇' : '🔊';
-        if(this.muted) { this.bgm.pause(); } 
-        else { this.bgm.play().catch(()=>{}); this.bgmStarted = true; }
+        const btnSet = document.getElementById('btn-sound-settings');
+        
+        if(this.muted) { 
+            this.bgm.pause(); 
+            if (btnSet) btnSet.innerText = window.lang === 'pt' ? '🔇 Som Desativado' : '🔇 Sound Off';
+        } else { 
+            this.bgm.play().catch(()=>{}); 
+            this.bgmStarted = true; 
+            if (btnSet) btnSet.innerText = window.lang === 'pt' ? '🔊 Som Ativado' : '🔊 Sound On';
+        }
         this.playClick();
     }
 };
@@ -51,7 +58,8 @@ const i18n = {
         you: "Você", lvl: "Nvl", atk: "Atk", def: "Def", open_bag: "(Toque para abrir)",
         invTitle: "🎒 Equipamentos", equipped: "🤺 Corpo", bagItems: "📦 Mochila",
         settings: "⚙️ Sistema", lang: "Idioma", saveGame: "💾 Salvar e Sair", resetGame: "⚠️ Apagar Save",
-        closeSet: "Voltar ao Jogo", unequip: "Tirar", equip: "Equipar", use: "Beber", empty: "Vazio"
+        closeSet: "Voltar ao Jogo", unequip: "Tirar", equip: "Equipar", use: "Beber", empty: "Vazio",
+        soundOn: "🔊 Som Ativado", soundOff: "🔇 Som Desativado"
     },
     en: {
         choose: "Choose your destiny:", explore: "🌲 Explore", rest: "🛌 Inn (10💰)", buy: "🛒 Buy Potion (20💰)",
@@ -59,7 +67,8 @@ const i18n = {
         you: "You", lvl: "Lvl", atk: "Atk", def: "Def", open_bag: "(Tap to open)",
         invTitle: "🎒 Equipment", equipped: "🤺 Body", bagItems: "📦 Backpack",
         settings: "⚙️ System", lang: "Language", saveGame: "💾 Save & Exit", resetGame: "⚠️ Erase Save",
-        closeSet: "Back to Game", unequip: "Unequip", equip: "Equip", use: "Drink", empty: "Empty"
+        closeSet: "Back to Game", unequip: "Unequip", equip: "Equip", use: "Drink", empty: "Empty",
+        soundOn: "🔊 Sound On", soundOff: "🔇 Sound Off"
     }
 };
 
@@ -90,6 +99,7 @@ window.sys = {
         document.getElementById('txt-save').innerText = d.saveGame;
         document.getElementById('txt-reset').innerText = d.resetGame;
         document.getElementById('txt-close-settings').innerText = d.closeSet;
+        document.getElementById('btn-sound-settings').innerText = window.audio.muted ? d.soundOff : d.soundOn;
         if(window.player && window.player.classObj) window.ui.updateInventoryModal();
     },
     exitSave() { window.audio.playClick(); window.game.saveGame(); location.reload(); }
