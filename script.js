@@ -1,41 +1,19 @@
-// Callback do Google Sign In
 function handleCredentialResponse(response) {
     console.log("Token do Google recebido:", response.credential);
-    // Aqui você implementa o envio do token para seu backend ou Firebase 
-    // para recuperar/salvar o "localStorage.getItem('aethelgard_save')" na conta do jogador.
     window.ui.log("☁️ Conta Google conectada com sucesso!", "sys");
     document.getElementById('txt-cloud-info').innerText = "Conta conectada. Progresso sincronizado!";
 }
 
 window.audio = {
-    bgm: new Audio('bgm.mp3'), 
-    clickSfx: new Audio('click.mp3'),
-    attackSfx: new Audio('attack.mp3'),
-    gruntSfx: new Audio('grunt.mp3'),
-    bgmStarted: false,
+    bgm: new Audio('bgm.mp3'), clickSfx: new Audio('click.mp3'),
+    attackSfx: new Audio('attack.mp3'), gruntSfx: new Audio('grunt.mp3'), bgmStarted: false,
     
-    init() {
-        this.bgm.loop = true; 
-        this.bgm.volume = 0.3; 
-        this.clickSfx.volume = 0.7; 
-        this.attackSfx.volume = 1.0; 
-        this.gruntSfx.volume = 0.8;
-    },
-    
-    startBGM() {
-        if (!this.bgmStarted) {
-            let playPromise = this.bgm.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => { this.bgmStarted = true; }).catch(error => { console.log("Áudio aguardando interação."); });
-            }
-        }
-    },
-
+    init() { this.bgm.loop = true; this.bgm.volume = 0.3; this.clickSfx.volume = 0.7; this.attackSfx.volume = 1.0; this.gruntSfx.volume = 0.8; },
+    startBGM() { if (!this.bgmStarted) { let p = this.bgm.play(); if (p !== undefined) { p.then(() => { this.bgmStarted = true; }).catch(e => {}); } } },
     playClick() { this.clickSfx.currentTime = 0; this.clickSfx.play().catch(()=>{}); },
     playAttack() { this.attackSfx.currentTime = 0; this.attackSfx.play().catch(()=>{}); },
     playGrunt() { this.gruntSfx.currentTime = 0; this.gruntSfx.play().catch(()=>{}); }
 };
-
 window.audio.init();
 
 window.lang = 'pt';
@@ -60,24 +38,15 @@ const i18n = {
 
 window.sys = {
     setLang(l) {
-        window.audio.playClick();
-        window.lang = l; const d = i18n[l];
-        document.getElementById('txt-choose').innerText = d.choose;
-        document.getElementById('btn-explore').innerText = d.explore;
-        document.getElementById('btn-rest').innerText = d.rest;
-        document.getElementById('btn-buy-potion').innerText = d.buy;
-        document.getElementById('btn-attack').innerText = d.attack;
-        document.getElementById('btn-use-potion').innerText = d.potion;
-        document.getElementById('btn-flee').innerText = d.flee;
-        document.getElementById('txt-bag').innerText = d.bag;
-        document.getElementById('txt-open-bag').innerText = d.open_bag;
-        document.getElementById('txt-inv-title').innerText = d.invTitle;
-        document.getElementById('txt-equipped').innerText = d.equipped;
-        document.getElementById('txt-bag-items').innerText = d.bagItems;
-        document.getElementById('txt-settings-title').innerText = d.settings;
-        document.getElementById('txt-lang').innerText = d.lang;
-        document.getElementById('txt-save').innerText = d.saveGame;
-        document.getElementById('txt-reset').innerText = d.resetGame;
+        window.audio.playClick(); window.lang = l; const d = i18n[l];
+        document.getElementById('txt-choose').innerText = d.choose; document.getElementById('btn-explore').innerText = d.explore;
+        document.getElementById('btn-rest').innerText = d.rest; document.getElementById('btn-buy-potion').innerText = d.buy;
+        document.getElementById('btn-attack').innerText = d.attack; document.getElementById('btn-use-potion').innerText = d.potion;
+        document.getElementById('btn-flee').innerText = d.flee; document.getElementById('txt-bag').innerText = d.bag;
+        document.getElementById('txt-open-bag').innerText = d.open_bag; document.getElementById('txt-inv-title').innerText = d.invTitle;
+        document.getElementById('txt-equipped').innerText = d.equipped; document.getElementById('txt-bag-items').innerText = d.bagItems;
+        document.getElementById('txt-settings-title').innerText = d.settings; document.getElementById('txt-lang').innerText = d.lang;
+        document.getElementById('txt-save').innerText = d.saveGame; document.getElementById('txt-reset').innerText = d.resetGame;
         document.getElementById('txt-close-settings').innerText = d.closeSet;
         if(window.player && window.player.classObj) window.ui.updateInventoryModal();
     },
@@ -97,26 +66,163 @@ window.lootTables = {
     armors: [ { name: "Túnica", type: "armor", stat: 2 }, { name: "Cota de Malha", type: "armor", stat: 5 }, { name: "Placas Divinas", type: "armor", stat: 18 } ],
     offhands: [ { name: "Broquel", type: "offhand", adds: "def", stat: 3 }, { name: "Grimório", type: "offhand", adds: "atk", stat: 4 }, { name: "Escudo Divino", type: "offhand", adds: "def", stat: 10 } ]
 };
-window.npcs = [
-    { name: "Curandeira", encounter: () => { window.player.heal(80); window.ui.log("🧙‍♀️ +80 HP.", "loot"); } },
-    { name: "Sábio", encounter: () => { window.player.gainXp(50); window.ui.log("🧙‍♂️ +50 EXP.", "loot"); } },
-    { name: "Ladrão", encounter: () => { if(window.player.gold > 10) { window.player.gold -= 10; window.ui.log("🥷 Furtou 10 Ouro/Gold!", "dmg-taken"); } else window.ui.log("🥷 Sem ouro para roubar.", "sys"); } }
+
+// -----------------------------------------------------
+// NOVO SISTEMA DE EVENTOS DE HISTÓRIA
+// -----------------------------------------------------
+window.events = [
+    {
+        title: "🥷 O Ladrão de Estradas",
+        desc: "Um bandido encapuzado salta de uma árvore empunhando uma adaga enferrujada. 'A bolsa ou a vida, viajante!', ele rosna, estendendo a mão.",
+        choices: [
+            {
+                text: "💪 Intimidar (Exige Força ou Carisma)",
+                action: () => {
+                    if (window.player.str >= 10 || window.player.cha >= 12) {
+                        window.ui.log("🗣️ Você ergueu sua arma e o encarou. O bandido se assustou e fugiu derrubando 15💰!", "loot");
+                        window.player.gold += 15;
+                    } else {
+                        window.ui.log("🩸 Ele riu da sua tentativa e te esfaqueou antes de fugir!", "dmg-taken");
+                        window.player.hp = Math.max(1, window.player.hp - 15);
+                    }
+                }
+            },
+            {
+                text: "💨 Fugir Rapidamente (Exige Velocidade)",
+                action: () => {
+                    if (window.player.spd >= 8) {
+                        window.ui.log("💨 Você foi mais rápido e o deixou comendo poeira!", "skill");
+                    } else {
+                        window.ui.log("🥷 Você tropeçou. Ele te alcançou e roubou 10💰!", "dmg-taken");
+                        window.player.gold = Math.max(0, window.player.gold - 10);
+                    }
+                }
+            },
+            {
+                text: "💰 Entregar 5 Ouro",
+                action: () => {
+                    if (window.player.gold >= 5) {
+                        window.player.gold -= 5;
+                        window.ui.log("💰 Você pagou o pedágio e ele te deixou em paz.", "sys");
+                    } else {
+                        window.ui.log("🩸 Você não tinha ouro! Ele ficou furioso e te atacou!", "dmg-taken");
+                        window.player.hp = Math.max(1, window.player.hp - 10);
+                    }
+                }
+            }
+        ]
+    },
+    {
+        title: "📦 O Baú Trancado",
+        desc: "Você encontra um baú de madeira robusto escondido sob algumas folhas grossas. Ele possui uma fechadura complexa.",
+        choices: [
+            {
+                text: "🎯 Destrancar com cuidado (Exige Destreza)",
+                action: () => {
+                    if (window.player.dex >= 10) {
+                        window.ui.log("🔓 Clique! O baú abriu. Você encontrou 25💰 e 1 Poção!", "loot");
+                        window.player.gold += 25; window.player.potions++;
+                    } else {
+                        window.ui.log("💥 Uma agulha envenenada espetou seu dedo! A fechadura travou.", "dmg-taken");
+                        window.player.hp = Math.max(1, window.player.hp - 12);
+                    }
+                }
+            },
+            {
+                text: "🪓 Quebrar a tampa (Exige Força)",
+                action: () => {
+                    if (window.player.str >= 15) {
+                        window.ui.log("💥 CRASH! A madeira cedeu. Você pegou 20💰!", "loot");
+                        window.player.gold += 20;
+                    } else {
+                        window.ui.log("🔨 Sua arma bateu e ricocheteou. O baú está intacto, mas seus braços doem.", "sys");
+                    }
+                }
+            },
+            {
+                text: "🚶 Ignorar",
+                action: () => { window.ui.log("🚶 Melhor não arriscar armadilhas.", "sys"); }
+            }
+        ]
+    },
+    {
+        title: "🧙‍♀️ A Curandeira Ferida",
+        desc: "Uma velha senhora está caída no chão da floresta com um ferimento na perna. Ela pede ajuda com voz fraca.",
+        choices: [
+            {
+                text: "🧪 Dar uma Poção a ela",
+                action: () => {
+                    if (window.player.potions > 0) {
+                        window.player.potions--;
+                        window.ui.log("✨ A velha revelou ser um espírito da floresta! Você ganhou EXP e Defesa permanente!", "skill");
+                        window.player.gainXp(100);
+                        window.player.baseDef += 1;
+                        window.player.recalculateStats();
+                    } else {
+                        window.ui.log("❌ Você não tem poções para ajudá-la...", "sys");
+                    }
+                }
+            },
+            {
+                text: "🗣️ Ajudar com primeiros socorros (Exige Carisma)",
+                action: () => {
+                    if (window.player.cha >= 8) {
+                        window.ui.log("🌿 Ela agradeceu sua gentileza e conjurou uma magia de cura em você!", "loot");
+                        window.player.heal(window.player.maxHp);
+                        window.player.restoreMp(window.player.maxMp);
+                    } else {
+                        window.ui.log("🚶 Você tentou ajudar, mas ela recusou por desconfiança.", "sys");
+                    }
+                }
+            }
+        ]
+    },
+    {
+        title: "🏺 O Altar Sombrio",
+        desc: "No centro de uma clareira escura, um altar de pedra obsidiana pulsa com uma energia sinistra. Inscrições exigem um sacrifício de sangue.",
+        choices: [
+            {
+                text: "🩸 Cortar a mão (-20 HP, Ganha Atk Permanente)",
+                action: () => {
+                    if (window.player.hp > 20) {
+                        window.player.hp -= 20;
+                        window.player.baseAtk += 2;
+                        window.player.recalculateStats();
+                        window.ui.log("🌑 O altar sugou seu sangue. Você se sente mais forte... e mais frio.", "skill");
+                    } else {
+                        window.ui.log("💀 Você está muito fraco para sobreviver ao sacrifício.", "sys");
+                    }
+                }
+            },
+            {
+                text: "🙏 Rezar para os Deuses Antigos (Exige Carisma)",
+                action: () => {
+                    if (window.player.cha >= 15) {
+                        window.ui.log("✨ Uma luz divina purificou o altar. Você encontrou 40💰 nas cinzas!", "loot");
+                        window.player.gold += 40;
+                    } else {
+                        window.ui.log("🌩️ Os deuses sombrios se irritaram e drenaram sua Mana!", "dmg-taken");
+                        window.player.mp = 0;
+                    }
+                }
+            },
+            {
+                text: "🚶 Ir embora rápido",
+                action: () => { window.ui.log("🚶 Alguns poderes não devem ser perturbados.", "sys"); }
+            }
+        ]
+    }
 ];
 
 window.player = {
-    playerName: "Herói",
-    classObj: null, lvl: 1, xp: 0, xpToNext: 50, gold: 0, potions: 3, highestBossDefeated: 0,
-    hp: 0, maxHp: 0, mp: 0, maxMp: 0, baseAtk: 0, baseDef: 0, atk: 0, def: 0, 
-    str: 0, dex: 0, spd: 0, cha: 0,
+    playerName: "Herói", classObj: null, lvl: 1, xp: 0, xpToNext: 50, gold: 0, potions: 3, highestBossDefeated: 0,
+    hp: 0, maxHp: 0, mp: 0, maxMp: 0, baseAtk: 0, baseDef: 0, atk: 0, def: 0, str: 0, dex: 0, spd: 0, cha: 0,
     inventory: [], equipped: { weapon: null, armor: null, offhand: null },
 
     recalculateStats() {
         let offAtk = (this.equipped.offhand && this.equipped.offhand.adds === 'atk') ? this.equipped.offhand.stat : 0;
         let offDef = (this.equipped.offhand && this.equipped.offhand.adds === 'def') ? this.equipped.offhand.stat : 0;
-        // Atributos de força e destreza adicionam um pequeno bônus ao Atk/Def finais
-        let strBonus = Math.floor(this.str / 3);
-        let dexBonus = Math.floor(this.dex / 4);
-        
+        let strBonus = Math.floor(this.str / 3); let dexBonus = Math.floor(this.dex / 4);
         this.atk = this.baseAtk + (this.equipped.weapon ? this.equipped.weapon.stat : 0) + offAtk + strBonus;
         this.def = this.baseDef + (this.equipped.armor ? this.equipped.armor.stat : 0) + offDef + dexBonus;
         window.ui.update();
@@ -128,20 +234,11 @@ window.player = {
         this.equipped[item.type] = item; this.inventory.splice(i, 1);
         this.recalculateStats(); window.ui.updateInventoryModal(); window.game.saveGame();
     },
-
-    unequip(s) {
-        window.audio.playClick();
-        if (this.equipped[s]) { this.inventory.push(this.equipped[s]); this.equipped[s] = null; this.recalculateStats(); window.ui.updateInventoryModal(); window.game.saveGame(); }
-    },
-
+    unequip(s) { window.audio.playClick(); if (this.equipped[s]) { this.inventory.push(this.equipped[s]); this.equipped[s] = null; this.recalculateStats(); window.ui.updateInventoryModal(); window.game.saveGame(); } },
     sell(i) {
-        window.audio.playClick();
-        let item = this.inventory[i];
-        let sellPrice = item.stat * 5; // A economia do jogo: stat * 5 moedas de ouro
-        // Bônus de carisma na venda
-        sellPrice += Math.floor(this.cha / 2); 
-        this.gold += sellPrice;
-        this.inventory.splice(i, 1);
+        window.audio.playClick(); let item = this.inventory[i];
+        let sellPrice = (item.stat * 5) + Math.floor(this.cha / 2); 
+        this.gold += sellPrice; this.inventory.splice(i, 1);
         window.ui.log(`💰 Vendeu ${item.name} por ${sellPrice} ouro.`, "loot");
         window.ui.update(); window.ui.updateInventoryModal(); window.game.saveGame();
     },
@@ -158,178 +255,120 @@ window.player = {
         if (window.game.state === 'combat') { document.getElementById('inventory-modal').classList.add('hidden'); setTimeout(() => window.combat.enemyTurn(), 800); } 
         else window.game.saveGame();
     },
-
     buyPotion() {
         window.audio.playClick();
-        // Desconto por carisma
         let price = Math.max(5, 20 - Math.floor(this.cha / 5));
         if (this.gold >= price) { this.gold -= price; this.potions++; window.ui.log(`🛒 +1 Poção (${price}💰).`, "loot"); window.ui.update(); window.game.saveGame(); } 
         else window.ui.log("❌ Ouro insuficiente.");
     },
 
     gainXp(v) {
-        // Nível máximo alterado para 150
         if (this.lvl >= 150) return;
         this.xp += v;
         if (this.xp >= this.xpToNext) {
             this.lvl++; this.xp -= this.xpToNext; this.xpToNext = Math.floor(this.xpToNext * 1.5);
             this.maxHp += 15; this.hp = this.maxHp; this.maxMp += 5; this.mp = this.maxMp; this.baseAtk += 3; this.baseDef += 1; 
-            
-            // Aumento de atributos secundários a cada nível
-            this.str += Math.floor(Math.random() * 2) + 1;
-            this.dex += Math.floor(Math.random() * 2) + 1;
-            this.spd += Math.floor(Math.random() * 2) + 1;
-            this.cha += Math.floor(Math.random() * 2) + 1;
-
+            this.str += Math.floor(Math.random() * 2) + 1; this.dex += Math.floor(Math.random() * 2) + 1;
+            this.spd += Math.floor(Math.random() * 2) + 1; this.cha += Math.floor(Math.random() * 2) + 1;
             this.recalculateStats(); window.ui.log(`🎊 NÍVEL UP / LEVEL UP: ${this.lvl}!`, "loot");
         }
     }
 };
 
 window.game = {
-    state: 'menu',
-    tempClassKey: null,
-
-    saveGame() {
-        if (!window.player.classObj) return; 
-        localStorage.setItem('aethelgard_save', JSON.stringify(window.player));
-    },
-
+    state: 'menu', tempClassKey: null,
+    saveGame() { if (!window.player.classObj) return; localStorage.setItem('aethelgard_save', JSON.stringify(window.player)); },
     loadGame() {
         try {
             const saved = localStorage.getItem('aethelgard_save');
             if (saved) {
                 Object.assign(window.player, JSON.parse(saved));
+                window.player.str = window.player.str || window.player.classObj.str; window.player.dex = window.player.dex || window.player.classObj.dex;
+                window.player.spd = window.player.spd || window.player.classObj.spd; window.player.cha = window.player.cha || window.player.classObj.cha;
                 
-                // Garantir atributos para saves antigos
-                window.player.str = window.player.str || window.player.classObj.str;
-                window.player.dex = window.player.dex || window.player.classObj.dex;
-                window.player.spd = window.player.spd || window.player.classObj.spd;
-                window.player.cha = window.player.cha || window.player.classObj.cha;
-
                 document.getElementById('hero-name-display').innerText = window.player.playerName || "Herói";
-                document.getElementById('hero-icon').innerText = window.player.classObj.icon;
-                document.getElementById('player-art-icon').innerText = window.player.classObj.icon;
-                document.getElementById('hero-class-name').innerText = window.player.classObj.name;
-                document.getElementById('skill-name').innerText = window.player.classObj.skillName;
+                document.getElementById('hero-icon').innerText = window.player.classObj.icon; document.getElementById('player-art-icon').innerText = window.player.classObj.icon;
+                document.getElementById('hero-class-name').innerText = window.player.classObj.name; document.getElementById('skill-name').innerText = window.player.classObj.skillName;
 
                 document.getElementById('class-selection-screen').classList.add('hidden');
-                if (document.getElementById('name-selection-screen')) {
-                    document.getElementById('name-selection-screen').classList.add('hidden');
-                }
-                document.getElementById('main-game-screen').classList.remove('hidden');
-                document.getElementById('top-menu').classList.remove('hidden');
+                if (document.getElementById('name-selection-screen')) document.getElementById('name-selection-screen').classList.add('hidden');
+                document.getElementById('main-game-screen').classList.remove('hidden'); document.getElementById('top-menu').classList.remove('hidden');
                 
                 this.state = 'explore'; window.player.recalculateStats(); 
-                
-                document.body.addEventListener('click', () => { window.audio.startBGM(); }, { once: true });
-                return true;
+                document.body.addEventListener('click', () => { window.audio.startBGM(); }, { once: true }); return true;
             }
-        } catch(e) { localStorage.removeItem('aethelgard_save'); } 
-        return false;
+        } catch(e) { localStorage.removeItem('aethelgard_save'); } return false;
     },
-
-    resetGame() {
-        window.audio.playClick();
-        if(confirm(window.lang==='pt'?"Apagar todo seu progresso?":"Delete all progress?")) {
-            localStorage.removeItem('aethelgard_save'); location.reload();
-        }
-    },
-
-    chooseClass(key) {
-        window.audio.playClick(); 
-        this.tempClassKey = key;
-        
-        document.getElementById('class-selection-screen').classList.add('hidden');
-        document.getElementById('name-selection-screen').classList.remove('hidden');
-        document.getElementById('input-hero-name').focus();
-    },
-
-    cancelName() {
-        window.audio.playClick();
-        this.tempClassKey = null;
-        document.getElementById('name-selection-screen').classList.add('hidden');
-        document.getElementById('class-selection-screen').classList.remove('hidden');
-    },
-
+    resetGame() { window.audio.playClick(); if(confirm(window.lang==='pt'?"Apagar todo seu progresso?":"Delete all progress?")) { localStorage.removeItem('aethelgard_save'); location.reload(); } },
+    
+    chooseClass(key) { window.audio.playClick(); this.tempClassKey = key; document.getElementById('class-selection-screen').classList.add('hidden'); document.getElementById('name-selection-screen').classList.remove('hidden'); document.getElementById('input-hero-name').focus(); },
+    cancelName() { window.audio.playClick(); this.tempClassKey = null; document.getElementById('name-selection-screen').classList.add('hidden'); document.getElementById('class-selection-screen').classList.remove('hidden'); },
     confirmName() {
         const input = document.getElementById('input-hero-name').value.trim();
-        if (!input) {
-            alert(window.lang === 'pt' ? "Por favor, batize seu herói!" : "Please name your hero!");
-            return;
-        }
-
-        window.audio.playClick(); 
-        window.audio.startBGM(); 
-
-        window.player.playerName = input;
-        const cls = window.classesData[this.tempClassKey]; 
-        window.player.classObj = cls;
+        if (!input) { alert(window.lang === 'pt' ? "Por favor, batize seu herói!" : "Please name your hero!"); return; }
+        window.audio.playClick(); window.audio.startBGM(); window.player.playerName = input;
+        const cls = window.classesData[this.tempClassKey]; window.player.classObj = cls;
         window.player.hp = cls.hp; window.player.maxHp = cls.hp; window.player.mp = cls.mp; window.player.maxMp = cls.mp;
         window.player.baseAtk = cls.atk; window.player.baseDef = cls.def; 
-        window.player.str = cls.str; window.player.dex = cls.dex; window.player.spd = cls.spd; window.player.cha = cls.cha;
+        window.player.str = cls.str; window.player.dex = cls.dex; window.player.spd = cls.spd; window.player.cha = cls.cha; window.player.recalculateStats();
         
-        window.player.recalculateStats();
-        
-        document.getElementById('hero-name-display').innerText = window.player.playerName;
-        document.getElementById('hero-icon').innerText = cls.icon; 
-        document.getElementById('player-art-icon').innerText = cls.icon;
-        document.getElementById('hero-class-name').innerText = cls.name; 
-        document.getElementById('skill-name').innerText = cls.skillName;
-        
-        document.getElementById('name-selection-screen').classList.add('hidden'); 
-        document.getElementById('main-game-screen').classList.remove('hidden');
-        document.getElementById('top-menu').classList.remove('hidden');
-        
-        this.state = 'explore'; 
-        window.ui.log(window.lang==='pt' ? `A lenda de ${window.player.playerName} começa!` : `The legend of ${window.player.playerName} begins!`, "loot"); 
-        this.saveGame();
+        document.getElementById('hero-name-display').innerText = window.player.playerName; document.getElementById('hero-icon').innerText = cls.icon; 
+        document.getElementById('player-art-icon').innerText = cls.icon; document.getElementById('hero-class-name').innerText = cls.name; document.getElementById('skill-name').innerText = cls.skillName;
+        document.getElementById('name-selection-screen').classList.add('hidden'); document.getElementById('main-game-screen').classList.remove('hidden'); document.getElementById('top-menu').classList.remove('hidden');
+        this.state = 'explore'; window.ui.log(`A lenda de ${window.player.playerName} começa!`, "loot"); this.saveGame();
     },
 
     explore() {
         window.audio.playClick();
         let b = Math.floor(window.player.lvl / 10) * 10;
         if (b >= 10 && window.player.highestBossDefeated < b && window.bossesDB[b]) {
-            window.ui.log(`🌩️ CHEFÃO / BOSS!`, "dmg-taken");
-            setTimeout(() => { window.combat.start(window.bossesDB[b], true, b); }, 1500); return;
+            window.ui.log(`🌩️ CHEFÃO / BOSS!`, "dmg-taken"); setTimeout(() => { window.combat.start(window.bossesDB[b], true, b); }, 1500); return;
         }
 
         const r = Math.random();
-        if (r < 0.45) window.combat.start(window.bestiary[Math.floor(Math.random()*window.bestiary.length)], false);
-        else if (r < 0.70) { 
+        
+        // NOVO BALANCEAMENTO DA EXPLORAÇÃO
+        // 40% de chance de Combate
+        if (r < 0.40) {
+            window.combat.start(window.bestiary[Math.floor(Math.random()*window.bestiary.length)], false);
+        } 
+        // 25% de chance de Evento de História (Pop-up)
+        else if (r < 0.65) {
+            window.ui.triggerEvent();
+        } 
+        // 20% de chance de Achar Ouro
+        else if (r < 0.85) { 
             const g = Math.floor(Math.random() * 20) + 5 + Math.floor(window.player.lvl * 2); window.player.gold += g;
-            window.ui.log(`🌲 Achou/Found ${g}💰.`, "loot"); window.ui.update(); this.saveGame();
-        } else if (r < 0.85) { 
+            window.ui.log(`🌲 Achou/Found ${g}💰 numa clareira.`, "loot"); window.ui.update(); this.saveGame();
+        } 
+        // 15% de chance de Achar Equipamento
+        else { 
             const iRoll = Math.random(); let dropTemplate;
             if(iRoll < 0.33) dropTemplate = window.lootTables.weapons[Math.floor(Math.random() * window.lootTables.weapons.length)];
             else if(iRoll < 0.66) dropTemplate = window.lootTables.armors[Math.floor(Math.random() * window.lootTables.armors.length)];
             else dropTemplate = window.lootTables.offhands[Math.floor(Math.random() * window.lootTables.offhands.length)];
             
-            // Escala o item com o nível do jogador
             let scaledStat = dropTemplate.stat + Math.floor(window.player.lvl / 2);
             let drop = { ...dropTemplate, stat: scaledStat };
-
-            window.player.inventory.push(drop); window.ui.log(`🎁 Item: <b>${drop.name} (+${drop.stat})</b>!`, "skill");
+            window.player.inventory.push(drop); window.ui.log(`🎁 Baú esquecido! Item: <b>${drop.name} (+${drop.stat})</b>!`, "skill");
             window.ui.update(); this.saveGame();
-        } else { window.npcs[Math.floor(Math.random() * window.npcs.length)].encounter(); window.ui.update(); this.saveGame(); }
+        }
     },
 
     rest() {
-        window.audio.playClick();
-        let innPrice = 10; // Preço fixo da pousada
+        window.audio.playClick(); let innPrice = 10;
         if (window.player.gold >= innPrice) {
             window.player.gold -= innPrice; window.player.hp = window.player.maxHp; window.player.mp = window.player.maxMp;
-            window.ui.log(window.lang==='pt'?`🛌 Descansou (${innPrice}💰).`:`🛌 Rested (${innPrice}💰).`, "loot"); window.ui.update(); this.saveGame();
+            window.ui.log(window.lang==='pt'?`🛌 Descansou na pousada local (${innPrice}💰).`:`🛌 Rested (${innPrice}💰).`, "loot"); window.ui.update(); this.saveGame();
         } else { window.ui.log(window.lang==='pt'?"❌ Ouro insuficiente.":"❌ Not enough gold."); }
     }
 };
 
 window.combat = {
     enemy: null, isBossFight: 0, 
-
     start(e, isBoss = false, bLvl = 0) {
         window.game.state = 'combat'; this.isBossFight = isBoss ? bLvl : 0;
-        const scale = 1 + ((window.player.lvl - 1) * 0.25); // Inimigos escalam mais forte
+        const scale = 1 + ((window.player.lvl - 1) * 0.25);
         this.enemy = { name: e.name, hp: Math.floor(e.baseHp * scale), maxHp: Math.floor(e.baseHp * scale), atk: Math.floor(e.baseAtk * scale), xp: Math.floor(e.baseXp * scale), gold: Math.floor(e.baseGold * scale), icon: e.icon, lvl: isBoss ? bLvl : window.player.lvl };
         
         document.getElementById('battle-arena').style.boxShadow = isBoss ? "inset 0 0 30px #b71c1c, 0 5px 15px rgba(0,0,0,0.8)" : "inset 0 0 30px #000, 0 5px 15px rgba(0,0,0,0.8)";
@@ -337,83 +376,61 @@ window.combat = {
         window.ui.log(`⚠️ <b>${this.enemy.name} (Nvl ${this.enemy.lvl})</b> ataca!`, "dmg-taken");
         window.ui.toggleMode(true); window.ui.update();
     },
-
     attack() {
         if (!this.enemy || this.enemy.hp <= 0) return;
         window.audio.playAttack(); window.ui.animate('player-portrait', 'anim-attack');
         const damage = window.player.atk + Math.floor(Math.random() * 8);
         this.processPlayerDamage(damage, `⚔️ <b>${damage}</b> dmg!`);
     },
-
     useSkill() {
         if (!this.enemy || this.enemy.hp <= 0) return;
         if (window.player.mp < window.player.classObj.skillCost) return window.ui.log("❌ Sem Mana / OOM", "dmg-taken");
-        
         window.player.mp -= window.player.classObj.skillCost; window.ui.update();
         window.audio.playAttack(); window.ui.animate('player-portrait', 'anim-attack');
-        
         const damage = Math.floor((window.player.atk * window.player.classObj.skillMult)) + Math.floor(Math.random() * 15);
         this.processPlayerDamage(damage, `✨ <b>${window.player.classObj.skillName}</b>: <b>${damage}</b> dmg!`, "skill");
     },
-
     processPlayerDamage(damage, logMsg) {
         this.enemy.hp -= damage; window.ui.log(logMsg, "dmg-dealt"); window.ui.animate('enemy-portrait', 'anim-shake'); window.ui.update();
         document.getElementById('combat-actions').style.pointerEvents = 'none';
         if (this.enemy.hp <= 0) setTimeout(() => this.win(), 800); else setTimeout(() => this.enemyTurn(), 1000);
     },
-
     enemyTurn() {
         if (!this.enemy || window.player.hp <= 0) return;
         window.ui.animate('enemy-portrait', 'anim-attack');
-        
-        // Evasão baseada na Destreza e Velocidade do jogador (max 30% chance)
         let dodgeChance = Math.min(0.30, (window.player.dex + window.player.spd) / 1000);
         if(Math.random() < dodgeChance) {
-            window.ui.log(`💨 Esquivou! / Dodged!`, "skill");
-            document.getElementById('combat-actions').style.pointerEvents = 'auto';
-            return;
+            window.ui.log(`💨 Esquivou! / Dodged!`, "skill"); document.getElementById('combat-actions').style.pointerEvents = 'auto'; return;
         }
-
         const finalDamage = Math.max(1, (this.enemy.atk + Math.floor(Math.random() * 6)) - window.player.def); 
-        window.player.hp -= finalDamage;
-        window.audio.playGrunt();
+        window.player.hp -= finalDamage; window.audio.playGrunt();
         window.ui.log(`🩸 Inimigo ataca: <b>${finalDamage}</b> (Aparou/Def ${window.player.def}🛡️).`, "dmg-taken");
-        window.ui.animate('player-portrait', 'anim-shake'); window.ui.update();
-        document.getElementById('combat-actions').style.pointerEvents = 'auto';
+        window.ui.animate('player-portrait', 'anim-shake'); window.ui.update(); document.getElementById('combat-actions').style.pointerEvents = 'auto';
         if (window.player.hp <= 0) this.lose();
     },
-
     flee() {
         window.audio.playClick();
         if (this.isBossFight) return window.ui.log("❌ BOSS FIGHT!", "dmg-taken");
-        
-        // Chance de fuga baseada na Velocidade (base 40% + bônus de vel)
         let fleeChance = 0.4 + (window.player.spd / 200); 
-
-        if (Math.random() < fleeChance) { window.ui.log(window.lang==='pt'?"🏃 Escapou!":"🏃 Escaped!"); this.end(); } 
-        else { window.ui.log(window.lang==='pt'?"🏃 Falhou!":"🏃 Failed!", "dmg-taken"); document.getElementById('combat-actions').style.pointerEvents = 'none'; setTimeout(() => this.enemyTurn(), 800); }
+        if (Math.random() < fleeChance) { window.ui.log(window.lang==='pt'?"🏃 Escapou para a floresta!":"🏃 Escaped!"); this.end(); } 
+        else { window.ui.log(window.lang==='pt'?"🏃 Tropeçou e falhou!":"🏃 Failed!", "dmg-taken"); document.getElementById('combat-actions').style.pointerEvents = 'none'; setTimeout(() => this.enemyTurn(), 800); }
     },
-
     win() {
         window.ui.log(`🏆 Venceu/Win! +${this.enemy.gold}💰, +${this.enemy.xp} EXP.`, "loot");
         window.player.gold += this.enemy.gold; window.player.gainXp(this.enemy.xp); 
         if (this.isBossFight) {
-            window.player.highestBossDefeated = this.isBossFight;
-            window.ui.log(`👑 <b>CHEFÃO DERROTADO! / BOSS DEFEATED!</b>`, "skill");
+            window.player.highestBossDefeated = this.isBossFight; window.ui.log(`👑 <b>CHEFÃO DERROTADO!</b>`, "skill");
             if (this.isBossFight === 150) { setTimeout(() => { alert("🎉 PARABÉNS! Você derrotou o Deus da Ruína e salvou Aethelgard!"); location.reload(); }, 2000); return; }
         }
         window.game.saveGame(); this.end();
     },
-
     lose() {
         window.ui.log(`💀 <b>MORTO / DEAD.</b>`, "dmg-taken"); document.getElementById('combat-actions').style.display = 'none';
         localStorage.removeItem('aethelgard_save'); setTimeout(() => location.reload(), 4000);
     },
-
     end() { 
         window.game.state = 'explore'; this.enemy = null; this.isBossFight = 0; 
-        document.getElementById('combat-actions').style.pointerEvents = 'auto'; 
-        document.getElementById('battle-arena').style.borderColor = "#444"; 
+        document.getElementById('combat-actions').style.pointerEvents = 'auto'; document.getElementById('battle-arena').style.borderColor = "#444"; 
         document.getElementById('battle-arena').style.boxShadow = "inset 0 0 30px #000, 0 5px 15px rgba(0,0,0,0.8)";
         window.ui.toggleMode(false); window.ui.update(); 
     }
@@ -425,29 +442,20 @@ window.ui = {
         if(!window.player.classObj) return; 
         document.getElementById('hp').innerText = Math.max(0, window.player.hp); document.getElementById('max-hp').innerText = window.player.maxHp;
         document.getElementById('mp').innerText = window.player.mp; document.getElementById('max-mp').innerText = window.player.maxMp;
-        
         document.getElementById('atk-val').innerText = window.player.atk; document.getElementById('def-val').innerText = window.player.def;
         document.getElementById('str-val').innerText = window.player.str; document.getElementById('spd-val').innerText = window.player.spd;
         document.getElementById('dex-val').innerText = window.player.dex; document.getElementById('cha-val').innerText = window.player.cha;
-
         document.getElementById('lvl').innerText = window.player.lvl; document.getElementById('gold').innerText = window.player.gold; document.getElementById('potions').innerText = window.player.potions;
         document.getElementById('hp-bar').style.width = `${Math.max(0, (window.player.hp / window.player.maxHp) * 100)}%`; document.getElementById('mp-bar').style.width = `${Math.max(0, (window.player.mp / window.player.maxMp) * 100)}%`; document.getElementById('xp-bar').style.width = `${window.player.lvl >= 150 ? 100 : Math.min(100, (window.player.xp / window.player.xpToNext) * 100)}%`;
         if (window.combat.enemy) { document.getElementById('enemy-name-display').innerText = window.combat.enemy.name; document.getElementById('enemy-art-icon').innerText = window.combat.enemy.icon; document.getElementById('enemy-hp-bar').style.width = `${Math.max(0, (window.combat.enemy.hp / window.combat.enemy.maxHp) * 100)}%`; }
     },
     updateInventoryModal() {
         const d = i18n[window.lang]; let eqHTML = "";
-        
-        if (window.player.equipped.weapon) eqHTML += `<li class="inv-item"><span>🗡️ ${window.player.equipped.weapon.name} <span style="color:#ffb300;">(+${window.player.equipped.weapon.stat} Atk)</span></span> <button class="inv-btn" onclick="window.player.unequip('weapon')">${d.unequip}</button></li>`; 
-        else eqHTML += `<li class="inv-item" style="color:#777;">🗡️ ${d.empty}</li>`;
-        
-        if (window.player.equipped.offhand) eqHTML += `<li class="inv-item"><span>🎒 ${window.player.equipped.offhand.name} <span style="color:${window.player.equipped.offhand.adds==='atk'?'#ffb300':'#90caf9'};">(+${window.player.equipped.offhand.stat} ${window.player.equipped.offhand.adds==='atk'?'Atk':'Def'})</span></span> <button class="inv-btn" onclick="window.player.unequip('offhand')">${d.unequip}</button></li>`; 
-        else eqHTML += `<li class="inv-item" style="color:#777;">🎒 ${d.empty}</li>`;
-        
-        if (window.player.equipped.armor) eqHTML += `<li class="inv-item"><span>🛡️ ${window.player.equipped.armor.name} <span style="color:#90caf9;">(+${window.player.equipped.armor.stat} Def)</span></span> <button class="inv-btn" onclick="window.player.unequip('armor')">${d.unequip}</button></li>`; 
-        else eqHTML += `<li class="inv-item" style="color:#777;">🛡️ ${d.empty}</li>`;
-        
+        if (window.player.equipped.weapon) eqHTML += `<li class="inv-item"><span>🗡️ ${window.player.equipped.weapon.name} <span style="color:#ffb300;">(+${window.player.equipped.weapon.stat} Atk)</span></span> <button class="inv-btn" onclick="window.player.unequip('weapon')">${d.unequip}</button></li>`; else eqHTML += `<li class="inv-item" style="color:#777;">🗡️ ${d.empty}</li>`;
+        if (window.player.equipped.offhand) eqHTML += `<li class="inv-item"><span>🎒 ${window.player.equipped.offhand.name} <span style="color:${window.player.equipped.offhand.adds==='atk'?'#ffb300':'#90caf9'};">(+${window.player.equipped.offhand.stat} ${window.player.equipped.offhand.adds==='atk'?'Atk':'Def'})</span></span> <button class="inv-btn" onclick="window.player.unequip('offhand')">${d.unequip}</button></li>`; else eqHTML += `<li class="inv-item" style="color:#777;">🎒 ${d.empty}</li>`;
+        if (window.player.equipped.armor) eqHTML += `<li class="inv-item"><span>🛡️ ${window.player.equipped.armor.name} <span style="color:#90caf9;">(+${window.player.equipped.armor.stat} Def)</span></span> <button class="inv-btn" onclick="window.player.unequip('armor')">${d.unequip}</button></li>`; else eqHTML += `<li class="inv-item" style="color:#777;">🛡️ ${d.empty}</li>`;
         document.getElementById('inv-equipped').innerHTML = eqHTML;
-        let bagHTML = `<li class="inv-item"><span>🧪 Poção/Potion (x${window.player.potions})</span> <button class="inv-btn" onclick="window.player.usePotion()">${d.use}</button></li>`;
+        let bagHTML = `<li class="inv-item"><span>🧪 Poção (x${window.player.potions})</span> <button class="inv-btn" onclick="window.player.usePotion()">${d.use}</button></li>`;
         window.player.inventory.forEach((item, index) => {
             let icon = item.type === 'weapon' ? '🗡️' : (item.type === 'armor' ? '🛡️' : '🎒');
             let statType = item.type === 'weapon' ? 'Atk' : (item.type === 'armor' ? 'Def' : (item.adds === 'atk' ? 'Atk' : 'Def'));
@@ -455,6 +463,34 @@ window.ui = {
         });
         document.getElementById('inv-bag').innerHTML = bagHTML;
     },
+    
+    // Funções do Evento de História
+    triggerEvent() {
+        window.audio.playClick();
+        const ev = window.events[Math.floor(Math.random() * window.events.length)];
+        document.getElementById('event-title').innerText = ev.title;
+        document.getElementById('event-desc').innerText = ev.desc;
+        
+        const choicesContainer = document.getElementById('event-choices');
+        choicesContainer.innerHTML = '';
+        
+        ev.choices.forEach(choice => {
+            let btn = document.createElement('button');
+            btn.className = 'btn-medieval';
+            btn.innerText = choice.text;
+            btn.onclick = () => {
+                window.audio.playClick();
+                document.getElementById('event-modal').classList.add('hidden');
+                choice.action(); // Executa a ação da escolha
+                window.ui.update();
+                window.game.saveGame();
+            };
+            choicesContainer.appendChild(btn);
+        });
+
+        document.getElementById('event-modal').classList.remove('hidden');
+    },
+
     openInventory() { window.audio.playClick(); document.getElementById('inventory-modal').classList.remove('hidden'); this.updateInventoryModal(); },
     closeInventory() { window.audio.playClick(); document.getElementById('inventory-modal').classList.add('hidden'); },
     openSettings() { window.audio.playClick(); document.getElementById('settings-modal').classList.remove('hidden'); },
@@ -465,9 +501,6 @@ window.ui = {
 
 window.onload = () => { 
     window.sys.setLang('pt'); 
-    if(window.game.loadGame()) {
-        document.getElementById('top-menu').classList.remove('hidden'); 
-    } else {
-        document.getElementById('class-selection-screen').classList.remove('hidden'); 
-    }
+    if(window.game.loadGame()) { document.getElementById('top-menu').classList.remove('hidden'); } 
+    else { document.getElementById('class-selection-screen').classList.remove('hidden'); }
 };
