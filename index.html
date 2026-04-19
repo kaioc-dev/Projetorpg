@@ -112,6 +112,7 @@
                     <button class="btn-medieval" id="btn-rest" onclick="window.game.rest()">🛌 Pousada (10💰)</button>
                     <button class="btn-medieval purchase" id="btn-buy-potion" onclick="window.player.buyPotion()">🛒 Comprar Poção (20💰)</button>
                 </div>
+                
                 <div id="combat-actions" class="hidden">
                     <button class="btn-medieval attack" id="btn-attack" onclick="window.combat.attack()">⚔️ Atacar!</button>
                     <button class="btn-medieval skill" id="btn-skill" onclick="window.combat.useSkill()">✨ <span id="skill-name">Poder</span></button>
@@ -149,7 +150,7 @@
                 <h3 style="font-size: 0.9em; margin-bottom: 10px; color: #4e342e;">Nuvem / Cloud</h3>
                 <div id="g_id_onload" data-client_id="SEU_CLIENT_ID_AQUI.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
                 <div class="g_id_signin" data-type="standard" data-theme="filled_black" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="center" style="display:flex; justify-content:center;"></div>
-                <p style="font-size: 0.75em; color: #555; margin-top: 5px;" id="txt-cloud-info">Faça login para sincronizar seu progresso.</p>
+                <p style="font-size: 0.75em; color: #555; margin-top: 5px;" id="txt-cloud-info">Faça login para salvar na nuvem.</p>
             </div>
 
             <div style="margin-top: 25px; display:flex; flex-direction:column; gap:15px;">
@@ -163,7 +164,7 @@
 
     <div id="event-modal" class="modal-overlay hidden">
         <div class="parchment inventory-panel" style="text-align: center; padding: 25px;">
-            <h2 id="event-title" style="color: #b71c1c; font-size: 1.5em; margin-bottom: 15px;">📜 Evento</h2>
+            <h2 id="event-title" style="color: #b71c1c; font-size: 1.5em; margin-bottom: 15px; text-shadow: none;">📜 Evento</h2>
             <p id="event-desc" style="font-size: 1.05em; line-height: 1.5; margin-bottom: 25px; color: #3e2723; font-weight: bold;"></p>
             <div id="event-choices" style="display: flex; flex-direction: column; gap: 12px;">
                 </div>
