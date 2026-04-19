@@ -11,30 +11,36 @@
 
     <div id="game-container" class="wood-board">
         
+        <div id="top-menu" class="hidden">
+            <button class="top-btn" id="btn-save" onclick="window.game.saveGame()" title="Salvar">💾</button>
+            <button class="top-btn" id="btn-sound" onclick="window.audio.toggleMute()" title="Som">🔊</button>
+            <button class="top-btn" id="btn-settings" onclick="window.ui.openSettings()" title="Configurações">⚙️</button>
+        </div>
+
         <div id="class-selection-screen">
+            <div class="lang-selector">
+                <button onclick="window.sys.setLang('pt')">🇧🇷 PT</button>
+                <button onclick="window.sys.setLang('en')">🇺🇸 EN</button>
+            </div>
             <h1>🗡️ Aethelgard</h1>
-            <p style="text-align: center; color: #f5f5dc;">Escolha seu destino:</p>
+            <p id="txt-choose" style="text-align: center; color: #f5f5dc;">Escolha seu destino:</p>
             
             <div class="class-grid">
                 <button class="class-card parchment" onclick="window.game.chooseClass('cavaleiro')">
-                    <h2>🛡️ Cavaleiro</h2>
-                    <p>Defesa e Vida altas.</p>
-                    <small>Skill: Golpe Duplo</small>
+                    <h2>🛡️ <span class="c-name">Cavaleiro</span></h2>
+                    <p class="c-desc">Defesa e Vida altas.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('mago')">
-                    <h2>🧙‍♂️ Mago</h2>
-                    <p>Dano mágico extremo.</p>
-                    <small>Skill: Bola de Fogo</small>
+                    <h2>🧙‍♂️ <span class="c-name">Mago</span></h2>
+                    <p class="c-desc">Dano mágico extremo.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('arqueiro')">
-                    <h2>🏹 Arqueiro</h2>
-                    <p>Ataque veloz e crítico.</p>
-                    <small>Skill: Tiro Preciso</small>
+                    <h2>🏹 <span class="c-name">Arqueiro</span></h2>
+                    <p class="c-desc">Ataque veloz e crítico.</p>
                 </button>
                 <button class="class-card parchment" onclick="window.game.chooseClass('anao')">
-                    <h2>🪓 Anão Guerreiro</h2>
-                    <p>O maior tanque do jogo.</p>
-                    <small>Skill: Fúria</small>
+                    <h2>🪓 <span class="c-name">Anão</span></h2>
+                    <p class="c-desc">O maior tanque do jogo.</p>
                 </button>
             </div>
         </div>
@@ -50,92 +56,75 @@
 
             <header id="hero-status" class="parchment">
                 <div class="status-box">
-                    <h2><span id="hero-icon">🛡️</span> <span id="hero-class-name">Herói</span> <span style="font-size:0.6em; color:#555;">Nvl <span id="lvl">1</span></span></h2>
-                    
+                    <h2><span id="hero-icon">🛡️</span> <span id="hero-class-name">Herói</span> <span style="font-size:0.6em; color:#555;"><span id="txt-lvl">Nvl</span> <span id="lvl">1</span></span></h2>
                     <div class="bars">
-                        <div class="stat-row">
-                            <span>❤️ Vida:</span>
-                            <div class="bar-container hp-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div>
-                        </div>
-                        <div class="stat-row">
-                            <span>🔵 Mana:</span>
-                            <div class="bar-container mp-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div>
-                        </div>
-                        <div class="stat-row" style="margin-top: 5px;">
-                            <span style="color: #ffb300;">⚔️ Atk: <span id="atk-val">0</span></span> | 
-                            <span style="color: #90caf9;">🛡️ Def: <span id="def-val">0</span></span>
-                        </div>
-                        <div class="stat-row">
-                            <span>🌟 EXP:</span>
-                            <div class="bar-container xp-container"><div id="xp-bar" class="bar xp"></div></div>
-                        </div>
+                        <div class="stat-row"><span id="txt-hp">❤️ Vida:</span><div class="bar-container hp-container"><div id="hp-bar" class="bar hp"></div><span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span></div></div>
+                        <div class="stat-row"><span id="txt-mp">🔵 Mana:</span><div class="bar-container mp-container"><div id="mp-bar" class="bar mp"></div><span class="bar-text"><span id="mp">50</span>/<span id="max-mp">50</span></span></div></div>
+                        <div class="stat-row" style="margin-top: 5px;"><span style="color: #ffb300;">⚔️ Atk: <span id="atk-val">0</span></span> | <span style="color: #90caf9;">🛡️ Def: <span id="def-val">0</span></span></div>
+                        <div class="stat-row"><span>🌟 EXP:</span><div class="bar-container xp-container"><div id="xp-bar" class="bar xp"></div></div></div>
                     </div>
                 </div>
 
                 <div class="inventory-btn" onclick="window.ui.openInventory()">
-                    <h3>🎒 Bolsa</h3>
-                    <p>💰 Ouro: <b id="gold">0</b></p>
-                    <p>🧪 Poções: <b id="potions">3</b></p>
-                    <p style="font-size: 0.7em; text-align: center; color: #8e1d1d; margin-top:5px;">(Toque para abrir)</p>
+                    <h3 id="txt-bag">🎒 Bolsa</h3>
+                    <p>💰 <span id="txt-gold">Ouro</span>: <b id="gold">0</b></p>
+                    <p>🧪 <span id="txt-potions">Poções</span>: <b id="potions">3</b></p>
                 </div>
             </header>
 
             <main style="flex-grow: 1;">
                 <div id="battle-arena" class="hidden stone-bg">
                     <div class="vs-container">
-                        <div class="combatant" id="player-portrait">
-                            <div class="portrait-frame gold-frame"><div class="portrait hero-art" id="player-art-icon">🤺</div></div>
-                            <span class="label">Você</span>
-                        </div>
+                        <div class="combatant" id="player-portrait"><div class="portrait-frame gold-frame"><div class="portrait hero-art" id="player-art-icon">🤺</div></div><span class="label" id="txt-you">Você</span></div>
                         <div class="vs-text">⚔️</div>
-                        <div class="combatant" id="enemy-portrait">
-                            <div class="portrait-frame iron-frame"><div class="portrait enemy-art" id="enemy-art-icon">👺</div></div>
-                            <span class="label enemy-label" id="enemy-name-display">Monstro</span>
-                        </div>
+                        <div class="combatant" id="enemy-portrait"><div class="portrait-frame iron-frame"><div class="portrait enemy-art" id="enemy-art-icon">👺</div></div><span class="label enemy-label" id="enemy-name-display">Monstro</span></div>
                     </div>
-                    <div id="enemy-hud">
-                        <div class="bar-container enemy-hp-container"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div>
-                    </div>
+                    <div id="enemy-hud"><div class="bar-container enemy-hp-container"><div id="enemy-hp-bar" class="bar enemy-hp"></div></div></div>
                 </div>
             </main>
 
             <div id="controls">
                 <div id="exploration-actions">
-                    <button class="btn-medieval" onclick="window.game.explore()">🌲 Explorar</button>
-                    <button class="btn-medieval" onclick="window.game.rest()">🛌 Pousada (10💰)</button>
-                    <button class="btn-medieval purchase" onclick="window.player.buyPotion()">🛒 Comprar Poção (20💰)</button>
+                    <button class="btn-medieval" id="btn-explore" onclick="window.game.explore()">🌲 Explorar</button>
+                    <button class="btn-medieval" id="btn-rest" onclick="window.game.rest()">🛌 Pousada (10💰)</button>
+                    <button class="btn-medieval purchase" id="btn-buy-potion" onclick="window.player.buyPotion()">🛒 Comprar Poção (20💰)</button>
                 </div>
                 <div id="combat-actions" class="hidden">
-                    <button class="btn-medieval attack" onclick="window.combat.attack()">⚔️ Atacar!</button>
-                    <button class="btn-medieval skill" onclick="window.combat.useSkill()">✨ <span id="skill-name">Poder</span></button>
-                    <button class="btn-medieval heal" onclick="window.player.usePotion()">🧪 Poção</button>
-                    <button class="btn-medieval flee" onclick="window.combat.flee()">🏃 Fugir</button>
-                </div>
-
-                <div id="system-actions">
-                    <button class="btn-sys" onclick="window.game.saveGame()">💾 Salvar Jogo</button>
-                    <button class="btn-sys reset" onclick="window.game.resetGame()">🔄 Resetar Progresso</button>
+                    <button class="btn-medieval attack" id="btn-attack" onclick="window.combat.attack()">⚔️ Atacar!</button>
+                    <button class="btn-medieval skill" id="btn-skill" onclick="window.combat.useSkill()">✨ <span id="skill-name">Poder</span></button>
+                    <button class="btn-medieval heal" id="btn-use-potion" onclick="window.player.usePotion()">🧪 Poção</button>
+                    <button class="btn-medieval flee" id="btn-flee" onclick="window.combat.flee()">🏃 Fugir</button>
                 </div>
             </div>
         </div>
-        
     </div>
 
     <div id="inventory-modal" class="modal-overlay hidden">
         <div class="parchment inventory-panel">
-            <h2>🎒 Gerenciador de Itens</h2>
+            <h2 id="txt-inv-title">🎒 Gerenciador de Itens</h2>
             <button class="close-btn btn-medieval" onclick="window.ui.closeInventory()">❌ Fechar</button>
-            
             <div class="inventory-sections">
-                <div class="inv-category">
-                    <h3>🤺 Equipado Atual</h3>
-                    <ul id="inv-equipped"></ul>
-                </div>
-                <div class="inv-category" style="margin-top: 15px;">
-                    <h3>🎒 Sua Mochila</h3>
-                    <ul id="inv-bag"></ul>
-                </div>
+                <div class="inv-category"><h3 id="txt-equipped">🤺 Equipado Atual</h3><ul id="inv-equipped"></ul></div>
+                <div class="inv-category" style="margin-top: 15px;"><h3 id="txt-bag-items">🎒 Sua Mochila</h3><ul id="inv-bag"></ul></div>
             </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="parchment inventory-panel" style="text-align: center;">
+            <h2 id="txt-settings-title">⚙️ Configurações</h2>
+            
+            <div style="margin: 20px 0; display:flex; flex-direction:column; gap:10px;">
+                <button class="btn-medieval" style="background: #3e2723;" onclick="window.sys.setLang('pt')">Idioma: 🇧🇷 PT-BR</button>
+                <button class="btn-medieval" style="background: #3e2723;" onclick="window.sys.setLang('en')">Language: 🇺🇸 EN</button>
+            </div>
+
+            <div style="margin-top: 20px; display:flex; flex-direction:column; gap:10px;">
+                <button class="btn-medieval" style="background: #1b5e20;" id="btn-save-exit" onclick="window.sys.exitSave()">💾 Salvar e Sair</button>
+                <button class="btn-medieval" style="background: #b71c1c;" id="btn-exit-nosave" onclick="window.sys.exitNoSave()">🚪 Sair sem Salvar</button>
+            </div>
+            
+            <button class="close-btn btn-medieval" onclick="window.ui.closeSettings()">Voltar ao Jogo</button>
         </div>
     </div>
 
