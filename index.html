@@ -4,68 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crônicas de Aethelgard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Metamorphous&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    
     <div id="game-container">
-        <div class="game-title">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+
+        <div class="game-header-ornament">
             <h1>🗡️ Crônicas de Aethelgard</h1>
         </div>
 
-        <header>
-            <div class="character-info">
-                <h2>Cavaleiro - Nível <span id="lvl">1</span></h2>
-                <div class="bar-container tooltip" title="Experiência">
-                    <div id="xp-bar" class="bar xp"></div>
+        <header id="hero-status">
+            <div class="status-box parchment">
+                <h2>🛡️ <span id="hero-name">Cavaleiro</span></h2>
+                <p>Nível: <span id="lvl">1</span></p>
+                
+                <div class="bars">
+                    <div class="stat-row">
+                        <span>❤️ Vida:</span>
+                        <div class="bar-container hp-container">
+                            <div id="hp-bar" class="bar hp"></div>
+                            <span class="bar-text"><span id="hp">100</span>/<span id="max-hp">100</span></span>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <span>🌟 EXP:</span>
+                        <div class="bar-container xp-container">
+                            <div id="xp-bar" class="bar xp"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div id="stats">
-                <div class="stat tooltip" title="Vida">❤️ <span id="hp">100</span>/<span id="max-hp">100</span></div>
-                <div class="stat tooltip" title="Poções">🧪 <span id="potions">3</span></div>
-                <div class="stat tooltip" title="Ouro">💰 <span id="gold">0</span></div>
+
+            <div class="inventory parchment">
+                <h3>🎒 Bolsa</h3>
+                <p>💰 Ouro: <span id="gold">0</span></p>
+                <p>🧪 Poções: <span id="potions">3</span></p>
             </div>
         </header>
 
         <main>
-            <div id="arena" class="hidden">
-                <div class="portrait-container" id="player-portrait">
-                    <div class="portrait hero-art">🛡️</div>
+            <div id="battle-arena" class="hidden medieval-border">
+                <div class="vs-container">
+                    <div class="combatant player-side" id="player-portrait">
+                        <div class="portrait-frame gold-frame">
+                            <div class="portrait hero-art">🛡️</div>
+                        </div>
+                        <span class="label">Você</span>
+                    </div>
+                    <div class="vs-text">VS</div>
+                    <div class="combatant enemy-side" id="enemy-portrait">
+                        <div class="portrait-frame iron-frame">
+                            <div class="portrait enemy-art" id="enemy-art-icon">👺</div>
+                        </div>
+                        <span class="label enemy-label" id="enemy-name-display">...</span>
+                    </div>
                 </div>
-                
-                <div class="vs-text">VS</div>
-                
-                <div class="portrait-container" id="enemy-portrait">
-                    <div class="portrait enemy-art" id="enemy-art-icon">👹</div>
+
+                <div id="enemy-hud">
+                    <div class="bar-container enemy-hp-container">
+                        <div id="enemy-hp-bar" class="bar enemy-hp"></div>
+                    </div>
                 </div>
             </div>
 
-            <div id="enemy-panel" class="hidden">
-                <h3><span id="enemy-name">---</span></h3>
-                <div class="bar-container">
-                    <div id="enemy-hp-bar" class="bar enemy-hp"></div>
-                </div>
-            </div>
-
-            <div id="log-window">
+            <div id="log-window" class="stone-bg">
+                <h3>📜 Diário de Batalha</h3>
                 <ul id="game-log">
-                    <li>Sua jornada em Aethelgard começa agora...</li>
+                    <li>Sua lenda começa... Para onde irá?</li>
                 </ul>
             </div>
         </main>
 
-        <div id="controls">
+        <div id="controls" class="parchment">
             <div id="exploration-actions">
-                <button onclick="game.explore()">🌲 Explorar Floresta</button>
-                <button onclick="game.rest()">🛌 Pousada (10 Ouro)</button>
-                <button onclick="player.buyPotion()">🛒 Comprar Poção (20 Ouro)</button>
+                <button class="btn-medieval" onclick="game.explore()">🌲 Explorar Floresta</button>
+                <button class="btn-medieval" onclick="game.rest()">🛌 Pousada (10💰)</button>
+                <button class="btn-medieval purchase" onclick="player.buyPotion()">🛒 Comprar Poção (20💰)</button>
             </div>
             <div id="combat-actions" class="hidden">
-                <button class="btn-attack" onclick="combat.attack()">⚔️ Atacar</button>
-                <button class="btn-heal" onclick="player.usePotion()">🧪 Usar Poção</button>
-                <button class="btn-flee" onclick="combat.flee()">🏃 Fugir</button>
+                <button class="btn-medieval attack" onclick="combat.attack()">⚔️ Atacar</button>
+                <button class="btn-medieval heal" onclick="player.usePotion()">🧪 Usar Poção</button>
+                <button class="btn-medieval flee" onclick="combat.flee()">🏃 Fugir</button>
             </div>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
